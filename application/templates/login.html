@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}{{ lang.tr('login.title') }} - Nanibgal{% endblock %}
+
+{% block toplinks %}
+{% endblock %}
+
+{% block body %}
+{% if error is not none %}
+<div class="error">{{ error }}</div>
+{% endif %}
+<form method="POST" action="{{ url_for('route_login') }}">
+    <input name="next" hidden value="{{ request.args.get('next') or '' }}">
+    <table>
+        <tr>
+            <td>
+                {{ form.username.label }}
+            </td>
+            <td>
+                {{ form.username(required=True, minlength=4, maxlength=20, pattern=".{4,20}") }}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                {{ form.password.label }}
+            </td>
+            <td>
+                {{ form.password(required=True, maxlength=256, pattern=".{,256}") }}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                {{ form.remember.label }}
+            </td>
+            <td>
+                {{ form.remember }}
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <input type="submit" value="{{ lang.tr('login.login') }}" />
+            </td>
+        </tr>
+    </table>
+</form>
+{% endblock %}

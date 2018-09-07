@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}{{ lang.tr('register.title') }} - Nanibgal{% endblock %}
+
+{% block toplinks %}
+{% endblock %}
+
+{% block body %}
+{% if error is not none %}
+<div class="error">{{ error }}</div>
+{% endif %}
+{% for error in form.username.errors %}
+<div class="error">{{ error }}</div>
+{% endfor %}
+{% for error in form.password.errors %}
+<div class="error">{{ error }}</div>
+{% endfor %}
+{% for error in form.verify.errors %}
+<div class="error">{{ error }}</div>
+{% endfor %}
+<form method="POST" action="{{ url_for('route_register') }}">
+    <table>
+        <tr>
+            <td>
+                {{ form.username.label }}
+            </td>
+            <td>
+                {{ form.username(required=True, minlength=4, maxlength=20, pattern=".{4,20}") }}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                {{ form.password.label }}
+            </td>
+            <td>
+                {{ form.password(required=True, minlength=8, maxlength=256, pattern=".{8,256}") }}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                {{ form.verify.label }}
+            </td>
+            <td>
+                {{ form.verify(required=True, minlength=8, maxlength=256, pattern=".{8,256}") }}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                {{ form.remember.label }}
+            </td>
+            <td>
+                {{ form.remember }}
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <input type="submit" value="{{ lang.tr('register.register') }}" />
+            </td>
+        </tr>
+    </table>
+</form>
+{% endblock %}
