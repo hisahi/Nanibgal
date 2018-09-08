@@ -1,3 +1,0 @@
-
-class UserView():
-    pass

@@ -15,6 +15,11 @@ def get_safe_url(host_url, target, fallback):
     else:
         return fallback
 
+# returns a new function where arg has been bound as the first parameter,
+# effectively decreasing the arity of the function by one
+def bind1(func, arg):
+    return lambda *a, **k: func(arg, *a, **k)
+
 # takes a dict, converts it to a format accepted by the FlaskForm constructor as obj
 class populate_dict():
     def __init__(self, data):

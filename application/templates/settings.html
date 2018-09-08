@@ -2,122 +2,90 @@
 
 {% block title %}{{ lang.tr('settings.title') }} - Nanibgal{% endblock %}
 
-{% block toplinks %}
-{% endblock %}
-
 {% block body %}
 {% set nosuccess = false %}
 {% if error is not none %}
-<div class="error">{{ error }}</div>
+<div class="alert alert-danger" role="alert">{{ error }}</div>
 {% endif %}
 {% for error in form.oldpassword.errors %}
-<div class="error">{{ error }}</div>
-{% set nosuccess = true %}
+<div class="alert alert-danger" role="alert">{{ error }}</div>
 {% endfor %}
 {% for error in form.password.errors %}
-<div class="error">{{ error }}</div>
-{% set nosuccess = true %}
+<div class="alert alert-danger" role="alert">{{ error }}</div>
 {% endfor %}
 {% for error in form.verify.errors %}
-<div class="error">{{ error }}</div>
-{% set nosuccess = true %}
+<div class="alert alert-danger" role="alert">{{ error }}</div>
 {% endfor %}
-{% if success and not nosuccess %}
-<div class="success">{{ lang.tr('settings.success') }}</div>
+{% if success %}
+<div class="alert alert-success" role="alert">{{ lang.tr('settings.success') }}</div>
 {% endif %}
 <form method="POST" action="{{ url_for('route_settings') }}">
-    <table>
-        <tr>
-            <td>
-                {{ form.oldpassword.label }}
-            </td>
-            <td>
-                {{ form.oldpassword(required=True, maxlength=256, pattern=".{,256}") }}
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2">
-                <br />
-            </td>
-        </tr>
-        <tr>
-            <td>
-                {{ form.displayname.label }}
-            </td>
-            <td>
-                {{ form.displayname(required=True, minlength=1, maxlength=64, pattern=".{1,64}") }}
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2">
-                <br />
-            </td>
-        </tr>
-        <tr>
-            <td>
-                {{ form.password.label }}
-            </td>
-            <td>
-                {{ form.password(minlength=8, maxlength=256, pattern=".{8,256}") }}
-            </td>
-        </tr>
-        <tr>
-            <td>
-                {{ form.verify.label }}
-            </td>
-            <td>
-                {{ form.verify(minlength=8, maxlength=256, pattern=".{8,256}") }}
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2">
-                <br />
-            </td>
-        </tr>
-        <tr>
-            <td>
-                {{ form.privatemessages.label }}
-            </td>
-            <td>
-                {{ form.privatemessages }}
-            </td>
-        </tr>
-        <tr>
-            <td>
-                {{ form.privatefollows.label }}
-            </td>
-            <td>
-                {{ form.privatefollows }}
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2">
-                <br />
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2">
-                <input type="submit" value="{{ lang.tr('settings.save') }}" />
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2">
-                <br />
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2">
-                <div class="warning">{{ lang.tr('settings.deletewarning') }}</div>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                {{ form.deleteaccount.label }}
-            </td>
-            <td>
-                {{ form.deleteaccount(maxlength=32, pattern=".{,32}") }}
-            </td>
-        </tr>
-    </table>
+    <div class="form-group row {{ form.oldpassword.errors and 'has-danger' or '' }}">
+        <label for="oldpassword" class="col-4 col-form-label">{{ form.oldpassword.label }}</label>
+        <div class="col-8">
+            {{ form.oldpassword(class="form-control", required=True, minlength=8, maxlength=256, pattern=".{8,256}") }}
+        </div>
+        {% for error in form.oldpassword.errors %}
+        <div class="form-control-feedback">{{ error }}</div>
+        {% endfor %}
+        <small class="offset-sm-4 col-8 form-text text-muted">{{ lang.tr('settings.oldpasswordinfo') }}</small>
+    </div>
+    <br />
+    <div class="form-group row">
+        <label for="password" class="col-4 col-form-label">{{ form.displayname.label }}</label>
+        <div class="col-8">
+            {{ form.displayname(class="form-control", required=True, minlength=1, maxlength=64, pattern=".{1,64}") }}
+        </div>
+    </div>
+    <br />
+    <div class="form-group row {{ form.password.errors and 'has-danger' or '' }}">
+        <label for="password" class="col-4 col-form-label">{{ form.password.label }}</label>
+        <div class="col-8">
+            {{ form.password(class="form-control", required=True, minlength=8, maxlength=256, pattern=".{8,256}") }}
+        </div>
+        {% for error in form.password.errors %}
+        <div class="form-control-feedback">{{ error }}</div>
+        {% endfor %}
+    </div>
+    <div class="form-group row {{ form.verify.errors and 'has-danger' or '' }}">
+        <label for="verify" class="col-4 col-form-label">{{ form.verify.label }}</label>
+        <div class="col-8">
+            {{ form.verify(class="form-control", required=True, minlength=8, maxlength=256, pattern=".{8,256}") }}
+        </div>
+        {% for error in form.verify.errors %}
+        <div class="form-control-feedback">{{ error }}</div>
+        {% endfor %}
+    </div>
+    <br />
+    <div class="form-group row">
+        <label class="col-sm-4"></label>
+        <div class="col-sm-8">
+            <div class="form-check">
+                {{ form.privatemessages(class="form-check-input") }} {{ form.privatemessages.label }}
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-sm-4"></label>
+        <div class="col-sm-8">
+            <div class="form-check">
+                {{ form.privatefollows(class="form-check-input") }} {{ form.privatefollows.label }}
+            </div>
+        </div>
+    </div>
+    <br />
+    <div class="form-group row">
+        <div class="offset-sm-4 col-sm-8">
+            <button type="submit" class="btn btn-primary" >{{ lang.tr('settings.save') }}</button>
+        </div>
+    </div>
+    <br />
+    <div class="alert alert-danger" role="alert">{{ lang.tr('settings.deletewarning') }}</div>
+    <div class="form-group row">
+        <label for="password" class="col-4 col-form-label">{{ form.deleteaccount.label }}</label>
+        <div class="col-8">
+            {{ form.deleteaccount(class="form-control", maxlength=32, pattern=".{,32}") }}
+        </div>
+    </div>
 </form>
 {% endblock %}

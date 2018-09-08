@@ -1,6 +1,6 @@
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, validators
+from wtforms import IntegerField, StringField, TextAreaField, PasswordField, BooleanField, validators
 
 class LoginForm(FlaskForm):
     username = StringField("User name", [validators.Length(min=4, max=20)])
@@ -28,7 +28,7 @@ class RegisterForm(FlaskForm):
         return self
 
 class SettingsForm(FlaskForm):
-    oldpassword = PasswordField("Password", [validators.Length(max=256, message="settings.invalid_old_password")])
+    oldpassword = PasswordField("Password", [validators.Length(max=256, message="settings.error.invalid_old_password")])
     displayname = StringField("Display name", [validators.Length(max=64, message="settings.error.invalid_display_name_length")])
     #email = StringField("email", [validators.Email(message="register.error.invalid_email")])
     password = PasswordField("New password", [validators.Length(min=8, max=256, message="settings.error.invalid_password_length")])
@@ -48,5 +48,16 @@ class SettingsForm(FlaskForm):
         return self
 
 class NewPostForm(FlaskForm):
+    reply = IntegerField("Reply")
+    contents = TextAreaField("Contents", [validators.Length(min=1, max=256, message="new.error.invalid_length")])
+    link = StringField("Link", [validators.Length(min=1, max=256, message="new.error.invalid_link_length"), validators.URL(require_tld=True, message="new.error.invalid_link")])
+
+    def localized(self, lang):
+        #self.reply.label = lang.tr("")
+        #self.contents.label = lang.tr("new.contents")
+        self.link.label = lang.tr("new.link")
+        return self
+
+class EditPostForm(FlaskForm):
     def localized(self, lang):
         return self

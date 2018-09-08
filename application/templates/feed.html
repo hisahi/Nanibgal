@@ -3,5 +3,12 @@
 {% block title %}Nanibgal{% endblock %}
 
 {% block body %}
-𒀭𒀭𒊺𒉀
+<div class="list-group {{ (not msgs) and 'list-group-flush' or '' }}">
+{% for msg in msgs %}
+{{ render_message(msg['msg'], msg['user'].get_user_name()) | safe }}
+{% endfor %}
+{% if not msgs %}
+<li class="list-group-item">{{ lang.tr('feed.nomessages') }}</li>
+{% endif %}
+</div>
 {% endblock %}

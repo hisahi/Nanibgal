@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block title %}~{{ lang.tr('viewmessage.title').replace("%u", user.get_user_name()) }} - Nanibgal{% endblock %}
+
+{% block body %}
+<div class="list-group list-group-flush text-large">
+{{ render_message(msg, user.get_user_name(), disable_message_link = True) | safe }}
+</div>
+{% endblock %}

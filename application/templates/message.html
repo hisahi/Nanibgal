@@ -1,0 +1,18 @@
+<div class="list-group-item list-group-item-action flex-column align-items-start">
+    <div class="d-flex w-100 justify-content-between">
+        {%- if extra.disable_user_link %}
+        <small class="text-muted">~<b>{{ username }}</b></small>
+        {%- else %}
+        <small class="text-muted">~<a href="{{ url_for('route_profile', username = username) }}">{{ username }}</a></small>
+        {%- endif %}
+        <small class="text-muted">{{ msg.get_date_iso() }}</small>
+    </div>
+    {%- if extra.disable_message_link %}
+    <div class="mb-1">{{ msg.get_text() }}</div>
+    {%- else %}
+    <a href="{{ url_for('route_message', username = username, postid = msg.get_id()) }}">
+        <div class="mb-1">{{ msg.get_text() }}</div>
+    </a>
+    {%- endif %}
+    <small class="text-muted">link &middot; like &middot; edit &middot; delete</small>
+</div>

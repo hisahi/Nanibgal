@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}{{ lang.tr('newpost.title') }} - Nanibgal{% endblock %}
+
+{% block body %}
+{% if error is not none %}
+<div class="alert alert-danger" role="alert">{{ error }}</div>
+{% endif %}
+<form method="POST" action="{{ url_for('route_new') }}">
+    <div class="form-group row">
+        <h1 class="col-sm-1 col-11">{{ lang.tr('newpost.title') }}</h1>
+    </div>
+    {{ form.reply(hidden=True, value=request.args.get('reply') or '' ) }}
+    <div class="form-group row">
+        <div class="offset-sm-2 col-sm-8">
+            <small class="form-text text-muted float-right"><span id="contentslength">0</span> / 256</small>
+            {{ form.contents(class="form-control form-control-lg", required=True, minlength=1, maxlength=256, pattern=".{1,256}") }}
+        </div>
+    </div>
+    <div class="form-group row {{ form.link.errors and 'has-danger' or '' }}">
+        <label for="link" class="col-sm-2 offset-sm-2 col-form-label">{{ form.link.label }}</label>
+        <div class="col-sm-6">
+            {{ form.link(class="form-control", maxlength=256, pattern=".{,256}") }}
+        </div>
+        {% for error in form.link.errors %}
+        <div class="form-control-feedback">{{ error }}</div>
+        {% endfor %}
+        <small class="col-sm-10 offset-sm-4 form-text text-muted">{{ lang.tr('newpost.link') }}</small>
+    </div>
+    <div class="form-group row">
+        <div class="offset-sm-2 col-sm-10">
+            <button type="submit" class="btn btn-primary" >{{ lang.tr('newpost.submit') }}</button>
+        </div>
+    </div>
+</form>
+<script type="text/javascript" src="/static/lencounter.js"></script>
+{% endblock %}
