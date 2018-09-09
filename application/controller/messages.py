@@ -25,7 +25,7 @@ def new_message(uid, request):
             # if reply does not exist, just ignore
             reply = None
     else:
-        reply = none
+        reply = None
     msg = application.models.Message(uid, contents, link, reply)
     msg.add_itself()
     return (msg.get_id(), None)

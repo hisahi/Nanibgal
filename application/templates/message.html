@@ -1,9 +1,9 @@
 {%- if user.are_messages_private() and (not current_user.is_authenticated or not current_user.has_admin_rights() and current_user.get_id() != user.get_id()) %}
-<div class="list-group-item list-group-item-secondary flex-column align-items-start">
+<div class="list-group-item list-group-item-secondary flex-column align-items-start" data-message-id="{{ msg.get_id() }}">
     {{ lang.tr('message.private') }}
 </div>
 {%- else %}
-<div class="list-group-item flex-column align-items-start">
+<div class="list-group-item flex-column align-items-start" data-message-id="{{ msg.get_id() }}">
     <div class="d-flex w-100 justify-content-between">
         {%- if extra.disable_user_link %}
         <small class="text-muted">{%- if msg.is_reply %} <small class="text-primary"><span class="fa fa-reply has-tooltip" aria-hidden="true" title="{{ lang.tr('message.reply_tooltip') }}"></span></small> {%- endif %}

@@ -9,7 +9,7 @@ DEBUG = True
 
 # Public mode.
 # PUBLIC = True is not recommended on Flask dev server.
-PUBLIC = False
+PUBLIC = True
 
 # Port to run on.
 PORT = 5000
