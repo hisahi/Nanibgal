@@ -1,18 +1,81 @@
-<div class="list-group-item list-group-item-action flex-column align-items-start">
+{%- if user.are_messages_private() and (not current_user.is_authenticated or not current_user.has_admin_rights() and current_user.get_id() != user.get_id()) %}
+<div class="list-group-item list-group-item-secondary flex-column align-items-start">
+    {{ lang.tr('message.private') }}
+</div>
+{%- else %}
+<div class="list-group-item flex-column align-items-start">
     <div class="d-flex w-100 justify-content-between">
         {%- if extra.disable_user_link %}
-        <small class="text-muted">~<b>{{ username }}</b></small>
+        <small class="text-muted">{%- if msg.is_reply %} <small class="text-primary"><span class="fa fa-reply has-tooltip" aria-hidden="true" title="{{ lang.tr('message.reply_tooltip') }}"></span></small> {%- endif %}
+        <b>{{ displayname }}</b> &middot; ~{{ username }}</small>
         {%- else %}
-        <small class="text-muted">~<a href="{{ url_for('route_profile', username = username) }}">{{ username }}</a></small>
+        <small class="text-muted">{%- if msg.is_reply %} <small class="text-primary"><span class="fa fa-reply has-tooltip" aria-hidden="true" title="{{ lang.tr('message.reply_tooltip') }}"></span></small> {%- endif %}
+        <b><a href="{{ url_for('route_profile', username = username) }}">{{ displayname }}</a></b> &middot; ~{{ username }}</small>
         {%- endif %}
         <small class="text-muted">{{ msg.get_date_iso() }}</small>
     </div>
     {%- if extra.disable_message_link %}
-    <div class="mb-1">{{ msg.get_text() }}</div>
+    <div class="mb-1 {{ 'whitespace_preserve' if extra.pre_wrap else '' }}">{{ format_links(escape_html(msg.get_text())) | safe }}</div>
     {%- else %}
     <a href="{{ url_for('route_message', username = username, postid = msg.get_id()) }}">
-        <div class="mb-1">{{ msg.get_text() }}</div>
+        <div class="mb-1 {{ 'whitespace_preserve' if extra.pre_wrap else '' }}">{{ msg.get_text() }}</div>
     </a>
     {%- endif %}
-    <small class="text-muted">link &middot; like &middot; edit &middot; delete</small>
+    {%- if msg.link is not none %}
+    <span class="fa fa-link" aria-hidden="true"></span> <small class="text-muted overflow-ellipsis"><a href="{{ msg.link }}">{{ msg.link }}</a></small>
+    <br />
+    {%- endif %}
+    <small class="text-muted">
+        <span class="fa fa-reply" aria-hidden="true"></span> 
+        <a href="{{ url_for('route_new') }}?reply={{ msg.get_id() }}">{{ lang.tr('message.reply') }}</a> ({{ replies }}) 
+{%- if current_user.is_authenticated %}
+        &middot; 
+        <form class="inline" action="{{ url_for('route_toggle_like') }}" method="POST"><input type="hidden" name="next" value="{{ request.path + prefix_nonempty('?', request.query_string.decode('utf-8', 'ignore')) }}" />
+        <input type="hidden" name="mid" value="{{ msg.get_id() }}" />
+        <span class="fa {{ 'fa-heart' if current_user.has_liked_message(msg) else 'fa-heart-o' }}" aria-hidden="true"></span> 
+        <a href="javascript:void(0)" onclick="this.parentNode.submit()">{{ lang.tr('message.unlike' if current_user.has_liked_message(msg) else 'message.like') }} ({{ likes }})</a></form> 
+        {%- if (current_user.get_id() == user.get_id()) and msg.can_be_edited() %}
+        &middot; 
+        <span class="fa fa-pencil" aria-hidden="true"></span> 
+        <a href="{{ url_for('route_msg_edit') }}?msg={{ msg.get_id() }}">{{ lang.tr('message.edit') }}</a>
+        {%- endif %}
+        {%- if current_user.get_id() == user.get_id() or current_user.has_admin_rights() %}
+        &middot; 
+        <span class="fa fa-remove" aria-hidden="true"></span> 
+        <a href="javascript:void(0)" data-toggle="modal" data-target="#deleteModal{{ msg.get_id() }}">{{ lang.tr('message.delete') }}</a>
+        {%- endif %}
+{%- else %}
+        &middot; 
+        <span class="fa fa-heart-o" aria-hidden="true"></span> 
+        {{ lang.tr('message.likes') }} ({{ likes }}) 
+{%- endif %}
+    </small>
 </div>
+{%- if current_user.is_authenticated and (current_user.get_id() == user.get_id() or current_user.has_admin_rights()) %}
+<div class="modal fade" id="deleteModal{{ msg.get_id() }}" tabindex="-1" role="dialog" aria-labelledby="deleteModal{{ msg.get_id() }}Label" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">{{ lang.tr('message.deletemodal.title') }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            </div>
+            <div class="modal-body">
+                {{ lang.tr('message.deletemodal.text') }}
+                <br />
+                <br />
+                "<i>{{ msg.get_text() }}</i>"
+            </div>
+            <div class="modal-footer">
+                <form class="inline no-margin" action="{{ url_for('route_msg_delete') }}" method="POST">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ lang.tr('message.deletemodal.cancel') }}</button>
+                    <input type="submit" class="btn btn-danger" value="{{ lang.tr('message.deletemodal.delete') }}">
+                    <input type="hidden" name="mid" value="{{ msg.get_id() }}" />
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{%- endif %}
+{%- endif %}

@@ -1,24 +1,22 @@
 {% extends "base.html" %}
 
-{% block title %}{{ lang.tr('newpost.title') }} - Nanibgal{% endblock %}
+{% block title %}{{ lang.tr('editpost.title') }} - Nanibgal{% endblock %}
 
 {% block body %}
 {% if error is not none %}
 <div class="alert alert-danger" role="alert">{{ error }}</div>
 {% endif %}
 <div class="form-group row">
-    <h1 class="col-sm-1 col-11">{{ lang.tr('newpost.title') }}</h1>
+    <h1 class="col-sm-1 col-11">{{ lang.tr('editpost.title') }}</h1>
 </div>
-{%- if reply is not none %}
 <div class="list-group">
-    {{ reply | safe }}
+    {{ render_message(msg, disable_message_link = True, pre_wrap = True) | safe }}
     <div class="list-group-item list-group-item-primary flex-column align-items-start">
-        <span class="fa fa-reply" aria-hidden="true"></span> {{ lang.tr('newpost.replyingtoabovemessage') }}
+        <span class="fa fa-pencil" aria-hidden="true"></span> {{ lang.tr('editpost.abovemessage') }}
     </div>
 </div>
-{%- endif %}
-<form method="POST" action="{{ url_for('route_new') + prefix_nonempty('?', request.query_string.decode('utf-8', 'ignore')) }}">
-    {{ form.reply(hidden=True, value=reply_id ) }}
+<form method="POST" action="{{ url_for('route_msg_edit') + '?' + request.query_string.decode('utf-8', 'ignore') }}">
+    {{ form.msg(hidden=True, value=msg.get_id() ) }}
     <div class="form-group row">
         <div class="offset-sm-2 col-sm-8">
             <small class="form-text text-muted float-right"><span id="contentslength">0</span> / 256</small>
@@ -33,11 +31,11 @@
         {% for error in oldform.link.errors %}
         <small class="col-sm-10 offset-sm-4 form-text text-danger"><span class="fa fa-exclamation" aria-hidden="true"></span> {{ error }}</small>
         {% endfor %}
-        <small class="col-sm-10 offset-sm-4 form-text text-muted">{{ lang.tr('newpost.linkinfo') }}</small>
+        <small class="col-sm-10 offset-sm-4 form-text text-muted">{{ lang.tr('editpost.linkinfo') }}</small>
     </div>
     <div class="form-group row">
         <div class="offset-sm-2 col-sm-10">
-            <button type="submit" class="btn btn-primary" >{{ lang.tr('newpost.submit') }}</button>
+            <button type="submit" class="btn btn-primary" >{{ lang.tr('editpost.submit') }}</button>
         </div>
     </div>
     {{ form.csrf_token }}

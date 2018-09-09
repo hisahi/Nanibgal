@@ -4,3 +4,15 @@
 .text-large {
     font-size: 200%;
 }
+.whitespace-preserve {
+    white-space: pre-wrap;
+}
+.overflow-ellipsis {
+    text-overflow: ellipsis;
+}
+.no-margin {
+    margin: 0;
+}
+.has-tooltip {
+    cursor: help;
+}

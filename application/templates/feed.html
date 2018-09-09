@@ -5,7 +5,7 @@
 {% block body %}
 <div class="list-group {{ (not msgs) and 'list-group-flush' or '' }}">
 {% for msg in msgs %}
-{{ render_message(msg['msg'], msg['user'].get_user_name()) | safe }}
+{{ render_message(msg['msg'], msg['user'], has_liked = msg['has_liked'], likes = msg['likes'], replies = msg['replies']) | safe }}
 {% endfor %}
 {% if not msgs %}
 <li class="list-group-item">{{ lang.tr('feed.nomessages') }}</li>

@@ -1,5 +1,6 @@
 
 from urllib.parse import urlparse, urljoin
+import application.config
 
 # http://flask.pocoo.org/snippets/62/
 def is_safe_url(host_url, target):
@@ -19,6 +20,25 @@ def get_safe_url(host_url, target, fallback):
 # effectively decreasing the arity of the function by one
 def bind1(func, arg):
     return lambda *a, **k: func(arg, *a, **k)
+
+# sanitize and escape HTML
+def escape_html(x):
+    return x.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+# add a prefix to a string if it isn't empty
+def prefix_nonempty(prefix, text):
+    return prefix + text if text else text
+
+# generates a list of languages for SelectField
+def generate_language_list(lang):
+    available_langs = application.config.LANGUAGES
+    result = []
+    for key in available_langs:
+        if lang:
+            result.append((key, "{} ({}) [{}]".format(lang.tr("language." + key), available_langs[key], key)))
+        else:
+            result.append((key, "{} [{}]".format(available_langs[key], key)))
+    return result
 
 # takes a dict, converts it to a format accepted by the FlaskForm constructor as obj
 class populate_dict():

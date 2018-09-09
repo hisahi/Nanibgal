@@ -13,8 +13,8 @@
         <div class="col-8">
             {{ form.username(class="form-control", required=True, minlength=4, maxlength=20, pattern=".{4,20}") }}
         </div>
-        {% for error in form.username.errors %}
-        <div class="form-control-feedback">{{ error }}</div>
+        {% for error in oldform.username.errors %}
+        <small class="offset-sm-4 col-8 form-text text-danger"><span class="fa fa-exclamation" aria-hidden="true"></span> {{ error }}</small>
         {% endfor %}
         <small class="offset-sm-4 col-8 col-4 form-text text-muted">{{ lang.tr('register.usernamedetails') }}</small>
     </div>
@@ -23,8 +23,8 @@
         <div class="col-8">
             {{ form.password(class="form-control", required=True, minlength=8, maxlength=256, pattern=".{8,256}") }}
         </div>
-        {% for error in form.password.errors %}
-        <div class="form-control-feedback">{{ error }}</div>
+        {% for error in oldform.password.errors %}
+        <small class="offset-sm-4 col-8 form-text text-danger"><span class="fa fa-exclamation" aria-hidden="true"></span> {{ error }}</small>
         {% endfor %}
         <small class="offset-sm-4 col-8 form-text text-muted">{{ lang.tr('register.passworddetails') }}</small>
     </div>
@@ -33,8 +33,8 @@
         <div class="col-8">
             {{ form.verify(class="form-control", required=True, minlength=8, maxlength=256, pattern=".{8,256}") }}
         </div>
-        {% for error in form.verify.errors %}
-        <div class="form-control-feedback">{{ error }}</div>
+        {% for error in oldform.verify.errors %}
+        <small class="offset-sm-4 col-8 form-text text-danger"><span class="fa fa-exclamation" aria-hidden="true"></span> {{ error }}</small>
         {% endfor %}
     </div>
     <div class="form-group row">
@@ -50,5 +50,6 @@
             <button type="submit" class="btn btn-primary" >{{ lang.tr('register.register') }}</button>
         </div>
     </div>
+    {{ form.csrf_token }}
 </form>
 {% endblock %}

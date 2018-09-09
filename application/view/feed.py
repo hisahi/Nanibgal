@@ -1,13 +1,13 @@
 
-# (request.args, msgs_func, user) -> (msgs, offset, next_page, prev_page)
-def compute_pages(args, msgs_func, user):
+# (request.args, msgs_func, *func_args) -> (msgs, offset, next_page, prev_page)
+def compute_pages(args, msgs_func, *func_args):
     try:
         offset = int(args.get("p", 0))
     except:
         offset = 0
     if offset < 0:
         offset = 0
-    msgs = msgs_func(user, limit = 25 + 1, offset = offset)
+    msgs = msgs_func(*func_args, limit = 25 + 1, offset = offset)
     next_page, prev_page = None, None
     if offset > 0:
         prev_page = max(0, offset - 25)

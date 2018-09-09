@@ -1,9 +1,15 @@
 {% extends "base.html" %}
 
-{% block title %}~{{ lang.tr('viewmessage.title').replace("%u", user.get_user_name()) }} - Nanibgal{% endblock %}
+{% block title %}{{ lang.tr('viewmessage.title').replace("%u", user.get_user_name()) }} - Nanibgal{% endblock %}
 
 {% block body %}
+{%- if is_reply %}
+<div class="list-group">
+{{ render_message(reply, pre_wrap = True, fallback_if_deleted = True) | safe }}
+</div><br />
+<p class="text-muted">{{ lang.tr('message.is_reply') }}</p>
+{%- endif %}
 <div class="list-group list-group-flush text-large">
-{{ render_message(msg, user.get_user_name(), disable_message_link = True) | safe }}
+{{ render_message(msg, user, disable_message_link = True, pre_wrap = True) | safe }}
 </div>
 {% endblock %}

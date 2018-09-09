@@ -9,19 +9,23 @@
 </div>
 {%- if current_user.is_authenticated and not user.get_id() == current_user.get_id() %}
 <form class="inline" action="{{ url_for('route_toggle_follow') }}" method="POST"><input type="hidden" name="uid" value="{{ user.get_id() }}" />
-<a href="#" onclick="this.parentNode.submit()">{{ lang.tr('profile.unfollow' if current_user.is_following_id(user.get_id()) else 'profile.follow') }}</a></form>
+<a href="javascript:void(0)" onclick="this.parentNode.submit()">{{ lang.tr('profile.unfollow' if current_user.is_following_id(user.get_id()) else 'profile.follow') }}</a></form>
 &middot;
 <a href="{{ url_for('route_report_user') }}?uid={{ user.get_id() }}">{{ lang.tr('profile.report') }}</a></form>
 {%- endif %}
 <div>
-<p class="font-italic">{{ user.get_user_bio() }}</p>
+<p class="font-italic pre-wrap">{{ user.get_user_bio() }}</p>
 </div>
 <div class="list-group {{ (not msgs) and 'list-group-flush' or '' }}">
 {% for msg in msgs %}
-{{ render_message(msg['msg'], disable_user_link = True) | safe }}
+{{ render_message(msg['msg'], has_liked = msg['has_liked'], likes = msg['likes'], replies = msg['replies'], disable_user_link = True) | safe }}
 {% endfor %}
 {% if not msgs %}
+{%- if user.are_messages_private() %}
+<li class="list-group-item">{{ lang.tr('profile.messages_private') }}</li>
+{%- else %}
 <li class="list-group-item">{{ lang.tr('profile.nomessages') }}</li>
+{%- endif %}
 {% endif %}
 </div>
 {% endblock %}

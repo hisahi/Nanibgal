@@ -3,19 +3,11 @@
 {% block title %}{{ lang.tr('settings.title') }} - Nanibgal{% endblock %}
 
 {% block body %}
+<h1>{{ lang.tr('settings.title') }}</h1>
 {% set nosuccess = false %}
 {% if error is not none %}
 <div class="alert alert-danger" role="alert">{{ error }}</div>
 {% endif %}
-{% for error in form.oldpassword.errors %}
-<div class="alert alert-danger" role="alert">{{ error }}</div>
-{% endfor %}
-{% for error in form.password.errors %}
-<div class="alert alert-danger" role="alert">{{ error }}</div>
-{% endfor %}
-{% for error in form.verify.errors %}
-<div class="alert alert-danger" role="alert">{{ error }}</div>
-{% endfor %}
 {% if success %}
 <div class="alert alert-success" role="alert">{{ lang.tr('settings.success') }}</div>
 {% endif %}
@@ -23,40 +15,61 @@
     <div class="form-group row {{ form.oldpassword.errors and 'has-danger' or '' }}">
         <label for="oldpassword" class="col-4 col-form-label">{{ form.oldpassword.label }}</label>
         <div class="col-8">
-            {{ form.oldpassword(class="form-control", required=True, minlength=8, maxlength=256, pattern=".{8,256}") }}
+            {{ form.oldpassword(class="form-control", required=True, maxlength=256, pattern=".{,256}") }}
         </div>
-        {% for error in form.oldpassword.errors %}
-        <div class="form-control-feedback">{{ error }}</div>
+        {% for error in oldform.oldpassword.errors %}
+        <small class="offset-sm-4 col-8 form-text text-danger"><span class="fa fa-exclamation" aria-hidden="true"></span> {{ error }}</small>
         {% endfor %}
         <small class="offset-sm-4 col-8 form-text text-muted">{{ lang.tr('settings.oldpasswordinfo') }}</small>
     </div>
-    <br />
+    <hr />
+    <div class="form-group row">
+        <label for="password" class="col-4 col-form-label">{{ form.username.label }}</label>
+        <div class="col-8">
+            {{ form.username(class="form-control", required=True, minlength=4, maxlength=20, pattern=".{4,20}") }}
+        </div>
+    </div>
     <div class="form-group row">
         <label for="password" class="col-4 col-form-label">{{ form.displayname.label }}</label>
         <div class="col-8">
             {{ form.displayname(class="form-control", required=True, minlength=1, maxlength=64, pattern=".{1,64}") }}
         </div>
     </div>
-    <br />
+    <div class="form-group row">
+        <label for="password" class="col-4 col-form-label">{{ form.bio.label }}</label>
+        <div class="col-8">
+            {{ form.bio(class="form-control", maxlength=256, pattern=".{,256}") }}
+        </div>
+    </div>
+    <hr />
     <div class="form-group row {{ form.password.errors and 'has-danger' or '' }}">
         <label for="password" class="col-4 col-form-label">{{ form.password.label }}</label>
         <div class="col-8">
-            {{ form.password(class="form-control", required=True, minlength=8, maxlength=256, pattern=".{8,256}") }}
+            {{ form.password(class="form-control", minlength=8, maxlength=256, pattern=".{8,256}") }}
         </div>
-        {% for error in form.password.errors %}
-        <div class="form-control-feedback">{{ error }}</div>
+        {% for error in oldform.password.errors %}
+        <small class="offset-sm-4 col-8 form-text text-danger"><span class="fa fa-exclamation" aria-hidden="true"></span> {{ error }}</small>
         {% endfor %}
+        <small class="offset-sm-4 col-8 form-text text-muted">{{ lang.tr('register.passworddetails') }}</small>
     </div>
     <div class="form-group row {{ form.verify.errors and 'has-danger' or '' }}">
         <label for="verify" class="col-4 col-form-label">{{ form.verify.label }}</label>
         <div class="col-8">
-            {{ form.verify(class="form-control", required=True, minlength=8, maxlength=256, pattern=".{8,256}") }}
+            {{ form.verify(class="form-control", minlength=8, maxlength=256, pattern=".{8,256}") }}
         </div>
-        {% for error in form.verify.errors %}
-        <div class="form-control-feedback">{{ error }}</div>
+        {% for error in oldform.verify.errors %}
+        <small class="offset-sm-4 col-8 form-text text-danger"><span class="fa fa-exclamation" aria-hidden="true"></span> {{ error }}</small>
         {% endfor %}
+        <small class="offset-sm-4 col-8 form-text text-muted">{{ lang.tr('settings.newpasswordinfo') }}</small>
     </div>
-    <br />
+    <hr />
+    <div class="form-group row">
+        <label for="verify" class="col-4 col-form-label">{{ form.language.label }}</label>
+        <div class="col-8">
+            {{ form.language(class="form-control", required=True) }}
+        </div>
+    </div>
+    <hr />
     <div class="form-group row">
         <label class="col-sm-4"></label>
         <div class="col-sm-8">
@@ -73,19 +86,43 @@
             </div>
         </div>
     </div>
-    <br />
+    <div class="form-group row">
+        <label class="col-sm-4"></label>
+        <div class="col-sm-8">
+            <div class="form-check">
+                {{ form.privatelikes(class="form-check-input") }} {{ form.privatelikes.label }}
+            </div>
+        </div>
+    </div>
+    <hr />
     <div class="form-group row">
         <div class="offset-sm-4 col-sm-8">
             <button type="submit" class="btn btn-primary" >{{ lang.tr('settings.save') }}</button>
         </div>
     </div>
-    <br />
+    {{ form.csrf_token }}
+</form>
+<hr />
+<h1>{{ lang.tr('settings.deletetitle') }}</h1>
+<form method="POST" action="{{ url_for('route_delete_account') }}">
     <div class="alert alert-danger" role="alert">{{ lang.tr('settings.deletewarning') }}</div>
     <div class="form-group row">
-        <label for="password" class="col-4 col-form-label">{{ form.deleteaccount.label }}</label>
+        <label for="password" class="col-4 col-form-label">{{ deleteform.deleteaccount.label }}</label>
         <div class="col-8">
-            {{ form.deleteaccount(class="form-control", maxlength=32, pattern=".{,32}") }}
+            {{ deleteform.deleteaccount(class="form-control", maxlength=32, pattern=".{,32}") }}
         </div>
     </div>
+    <div class="form-group row">
+        <label for="oldpassword" class="col-4 col-form-label">{{ deleteform.oldpassword.label }}</label>
+        <div class="col-8">
+            {{ deleteform.oldpassword(class="form-control", required=True, maxlength=256, pattern=".{,256}") }}
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="offset-sm-4 col-sm-8">
+            <button type="submit" class="btn btn-danger" >{{ lang.tr('settings.deleteaccount') }}</button>
+        </div>
+    </div>
+    {{ deleteform.csrf_token }}
 </form>
 {% endblock %}
