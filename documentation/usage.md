@@ -8,6 +8,9 @@ Using Nanibgal when it is already hosted only requires a modern web browser.
 To install the server software, one needs at least Python 3.5 and to install
 the requirements as described in requirements.txt with pip.
 
+The server software should be configured first by modifying config.py
+under the application folder.
+
 To run the server, simply run main.py.
 
 # Usage

@@ -8,6 +8,9 @@ Valmiina olevan Nanibgal-instanssin käyttö vaatii vain nykyaikaisen selaimen.
 Palvelinohjelmiston asennukseen ja käyttöön vaaditaan Python 3.5. pip:n
 kautta tulee asentaa requirements.txt-tiedostossa luetellut moduulit.
 
+Palvelinohjelmisto tulisi ensin määritellä muokkaamalla applications-
+kansion config.py-tiedostoa.
+
 Palvelin käynnistetään suorittamalla main.py.
 
 # Käyttö
