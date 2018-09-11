@@ -6,6 +6,11 @@
 }
 .whitespace-preserve {
     white-space: pre-wrap;
+    word-wrap: break-word;
+}
+.whitespace-wrap {
+    white-space: normal;
+    word-wrap: break-word;
 }
 .overflow-ellipsis {
     text-overflow: ellipsis;

@@ -32,6 +32,7 @@ class User(db.Model):
     passhash = Column(Binary(60), nullable = False)
     registered = Column(DateTime, nullable = False, default = func.current_timestamp())
     is_admin = Column(Boolean, default = False)
+    banned = Column(Boolean, default = False)
     config = Column(Text, default = False)
 
     messages = relationship("Message")
@@ -44,6 +45,7 @@ class User(db.Model):
         self.email = email
         self.config = self.get_default_config()
         self.is_admin = False
+        self.banned = False
         self.change_password(password)
 
     def add_itself(self):
@@ -81,6 +83,9 @@ class User(db.Model):
 
     def has_admin_rights(self):
         return self.is_admin or False
+
+    def is_banned(self):
+        return self.banned or False
 
     def get_default_config(self):
         settings = {}
@@ -361,7 +366,7 @@ class ReportUser(db.Model):
     __tablename__ = "userreports"
     reportid = Column(Integer, primary_key = True)
     reported_by = Column(Integer, ForeignKey("users.userid", ondelete = "SET NULL"))
-    user_reported = Column(Integer, ForeignKey("users.userid", ondelete = "CASCADE"))
+    user_reported = Column(Integer, ForeignKey("users.userid", ondelete = "CASCADE"), nullable = False)
     reason = Column(String(128), nullable = False)
     reportdate = Column(DateTime, nullable = False, default = func.current_timestamp())
 
@@ -385,7 +390,7 @@ class ReportMessage(db.Model):
     __tablename__ = "msgreports"
     reportid = Column(Integer, primary_key = True)
     reported_by = Column(Integer, ForeignKey("users.userid", ondelete = "SET NULL"))
-    msg_reported = Column(Integer, ForeignKey("msgs.msgid", ondelete = "CASCADE"))
+    msg_reported = Column(Integer, ForeignKey("msgs.msgid", ondelete = "CASCADE"), nullable = False)
     reason = Column(String(128), nullable = False)
     reportdate = Column(DateTime, nullable = False, default = func.current_timestamp())
 
@@ -405,9 +410,60 @@ class ReportMessage(db.Model):
     def update(self):
         db.session.commit()
 
+class Notification(db.Model):
+    __tablename__ = "notifications"
+    notifid = Column(Integer, primary_key = True)
+    kind = Column(Integer, primary_key = True)
+        # 0 = new follower, 1 = message liked, 2 = reply to message, 3 = new mention
+    userid = Column(Integer, ForeignKey("users.userid", ondelete = "CASCADE"), nullable = False)
+    otheruserid = Column(Integer, ForeignKey("users.userid", ondelete = "CASCADE"))
+    messageid = Column(Integer, ForeignKey("msgs.msgid", ondelete = "CASCADE"))
+    notificationdate = Column(DateTime, nullable = False, default = func.current_timestamp())
+    unread = Column(Boolean, nullable = False, default = True)
+
+    # not to be used directly: use one of the four class methods instead
+    def __init__(self, kind, userid, otheruserid = None, messageid = None):
+        self.kind = kind
+        self.userid = userid
+        self.otheruserid = otheruserid
+        self.messageid = messageid
+        self.unread = True
+
+    @classmethod
+    def follow_notification(cls, user, follower):
+        return cls(0, user, follower)
+
+    @classmethod
+    def like_notification(cls, user, liked_by, liked_msg):
+        return cls(1, user, liked_by, liked_msg)
+
+    @classmethod
+    def reply_notification(cls, user, reply_by, reply_to_msg):
+        return cls(2, user, reply_by, reply_to_msg)
+
+    @classmethod
+    def mention_notification(cls, user, mention_by, mention_in_msg):
+        return cls(3, user, mention_by, mention_in_msg)
+
+    def add_itself(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def terminate(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def mark_as_read(self):
+        self.read = True
+        self.update()
+
 db.Index("idx_msgs_from_user", Message.author)
 db.Index("idx_user_from_id", User.userid)
 db.Index("idx_followeds_from_user", table_Follows.c.follower)
 db.Index("idx_likes_from_msg", table_Likes.c.msg)
 db.Index("idx_tags_from_msg", table_MsgTag.c.msg)
 db.Index("idx_msgs_from_tag", table_MsgTag.c.tag)
+db.Index("idx_notifs_from_user", Notification.userid)

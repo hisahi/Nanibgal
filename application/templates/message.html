@@ -7,7 +7,7 @@
     <div class="d-flex w-100 justify-content-between">
         {%- if extra.disable_user_link %}
         <small class="text-muted">{%- if msg.is_reply %} <small class="text-primary"><span class="fa fa-reply has-tooltip" aria-hidden="true" title="{{ lang.tr('message.reply_tooltip') }}"></span></small> {%- endif %}
-        <b>{{ displayname }}</b> &middot; ~{{ username }}</small>
+        <b class="whitespace-wrap">{{ displayname }}</b> &middot; ~{{ username }}</small>
         {%- else %}
         <small class="text-muted">{%- if msg.is_reply %} <small class="text-primary"><span class="fa fa-reply has-tooltip" aria-hidden="true" title="{{ lang.tr('message.reply_tooltip') }}"></span></small> {%- endif %}
         <b><a href="{{ url_for('route_profile', username = username) }}">{{ displayname }}</a></b> &middot; ~{{ username }}</small>
@@ -15,10 +15,10 @@
         <small class="text-muted">{{ msg.get_date_iso() }}</small>
     </div>
     {%- if extra.disable_message_link %}
-    <div class="mb-1 {{ 'whitespace_preserve' if extra.pre_wrap else '' }}">{{ format_links(escape_html(msg.get_text())) | safe }}</div>
+    <div class="mb-1 {{ 'whitespace-preserve' if extra.pre_wrap else 'whitespace-wrap' }}">{{ format_links(escape_html(msg.get_text())) | safe }}</div>
     {%- else %}
     <a href="{{ url_for('route_message', username = username, postid = msg.get_id()) }}">
-        <div class="mb-1 {{ 'whitespace_preserve' if extra.pre_wrap else '' }}">{{ msg.get_text() }}</div>
+        <div class="mb-1 {{ 'whitespace-preserve' if extra.pre_wrap else 'whitespace-wrap' }}">{{ msg.get_text() }}</div>
     </a>
     {%- endif %}
     {%- if msg.link is not none %}

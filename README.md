@@ -12,6 +12,7 @@ A microblogging service created for a school project. The name comes from ones o
 - Editing posts 5-10 minutes after they have been posted
 - Deleting posts
 - Using an administrative system for deleting posts and banning users
+- A notification system
 
 # Architecture
 The server runs on Python with the Flask framework and PostgreSQL as the database.
