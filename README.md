@@ -18,7 +18,7 @@ A microblogging service created for a school project. The name comes from ones o
 The server runs on Python with the Flask framework and PostgreSQL as the database.
 
 # Documentation
-English documentation can be found under the [documentation](https://github.com/hisahi/Nanibgal/documentation) folder.
+English documentation can be found under the [documentation](https://github.com/hisahi/Nanibgal/tree/master/documentation) folder.
 
 # Tietokantasovellus
-Kaikki Tietokantasovellus -kurssiin liittyvä sisältö löytyy [tsoha](https://github.com/hisahi/Nanibgal/tsoha)-kansion alta. Heroku-instanssi löytyy [täältä](https://nanibgal-demo-app.herokuapp.com/).
+Kaikki Tietokantasovellus -kurssiin liittyvä sisältö löytyy [tsoha](https://github.com/hisahi/Nanibgal/tree/master/tsoha)-kansion alta. Heroku-instanssi löytyy [täältä](https://nanibgal-demo-app.herokuapp.com/).
