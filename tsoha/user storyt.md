@@ -6,6 +6,18 @@ käyttäjät, valvojat sekä mahdollisesti porttikiellon saaneet käyttäjät.
 Mahdollisia käyttäjiä on kuitenkin laajalti, sillä mikroblogipalveluna
 käyttäjiä voi tulla monelta eri saralta.
 
+# User storyt
+* Käyttäjänä voin kirjautua ja luoda itselleni tilin, sekä poistaa sen.
+* Käyttäjänä voin muokata tilini asetuksia.
+* Käyttäjänä voin lähettää, muokata sekä poistaa viestejäni.
+* Käyttäjänä voin hakea viestejä tekstihaulla.
+* Käyttäjänä voin tykätä viestejä.
+* Käyttäjänä voin seurata toisia käyttäjiä.
+* Valvojana voin lukea ilmiantoja.
+* Valvojana voin antaa porttikiellon käyttäjälle.
+
+# Toiminnot
+
 ## Kirjautuminen
 Sivulle voi kirjautua käyttäjänimellä ja salasanalla, sekä tunnuksen
 voi luoda jos sellaista ei ole. Kirjautuminen vaaditaan viestien
@@ -74,6 +86,12 @@ viestiä ei voi katsoa.
 Viestin poistaminen:
 `DELETE FROM msgs WHERE msgid = 5;`
 
+## Viestien tekstihaku
+Viestejä voi hakea sisällön sekä linkkien perusteella.
+
+Viestin hakeminen sisällön perusteella:
+`SELECT * FROM msgs WHERE ' ' + contents + ' ' LIKE '% sana %';` 
+
 ## Viestin tykkääminen
 Käyttäjät voivat tykätä viestejä ja poistaa tykkäyksen. Viestejä voi
 tykätä vain kerran.
@@ -81,11 +99,11 @@ tykätä vain kerran.
 Viestin tykkääminen (käyttäjän ID = 3, viestin ID = 10):
 `INSERT INTO likes ("user", msg) VALUES (3, 10);`
 
-## Viestien hakeminen
-Viestejä voi hakea sisällön sekä linkkien perusteella.
+## Käyttäjien seuraaminen
+Käyttäjiä voi seurata ja seuraamisen voi poistaa.
 
-Viestin hakeminen sisällön perusteella:
-`SELECT * FROM msgs WHERE contents LIKE '%sana%';` 
+Käyttäjän seuraaminen (seuraajan ID = 3, seurattavan ID = 5):
+`INSERT INTO follows (follower, followed) VALUES (3, 5);`
 
 ## Ilmiantojen lukeminen
 Valvojat voivat lukea ilmiantoja sekä viesteistä että käyttäjistä.
