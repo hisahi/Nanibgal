@@ -6,7 +6,8 @@ Nanibgal is a microblogging service.
 Using Nanibgal when it is already hosted only requires a modern web browser.
 
 To install the server software, one needs at least Python 3.5 and to install
-the requirements as described in requirements.txt with pip.
+the requirements as described in requirements.txt with pip. You will also
+need a PostgreSQL setup with a database.
 
 The server software should be configured first by modifying config.py
 under the application folder.
@@ -39,8 +40,9 @@ feed and add /~username to the end of the address.
 You can edit aspects of your profile in the settings.
 
 ## Messages
-The main feature is creating posts. Posts may contain 256 characters
-of text in addition to a link, which is too restricted to 256 characters.
+A main feature of the service is the creation of posts. Posts may contain 256
+characters of text in addition to a link, which is too restricted to 256
+characters.
 
 Messages can be edited within 10 minutes of their posting and deleted
 at any time.

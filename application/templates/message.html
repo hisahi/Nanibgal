@@ -1,18 +1,22 @@
-{%- if user.are_messages_private() and (not current_user.is_authenticated or not current_user.has_admin_rights() and current_user.get_id() != user.get_id()) %}
+{%- if is_private and (not current_user.is_authenticated or not current_user.has_admin_rights() and current_user.get_id() != userid) %}
 <div class="list-group-item list-group-item-secondary flex-column align-items-start" data-message-id="{{ msg.get_id() }}">
     {{ lang.tr('message.private') }}
+</div>
+{%- elif is_banned and (not current_user.is_authenticated or not current_user.has_admin_rights()) %}
+<div class="list-group-item list-group-item-secondary flex-column align-items-start" data-message-id="{{ msg.get_id() }}">
+    {{ lang.tr('message.notavailable') }}
 </div>
 {%- else %}
 <div class="list-group-item flex-column align-items-start" data-message-id="{{ msg.get_id() }}">
     <div class="d-flex w-100 justify-content-between">
         {%- if extra.disable_user_link %}
         <small class="text-muted">{%- if msg.is_reply %} <small class="text-primary"><span class="fa fa-reply has-tooltip" aria-hidden="true" title="{{ lang.tr('message.reply_tooltip') }}"></span></small> {%- endif %}
-        <b class="whitespace-wrap">{{ displayname }}</b> &middot; ~{{ username }}</small>
+        <b class="whitespace-wrap">{{ displayname }}</b> &middot; ~{{ username }}{%- if is_private %} &middot; <b>{{ lang.tr("profile.private") }}</b>{%- endif %}{%- if is_banned %} &middot; <b>{{ lang.tr("profile.banned") }}</b>{%- endif %}</small>
         {%- else %}
         <small class="text-muted">{%- if msg.is_reply %} <small class="text-primary"><span class="fa fa-reply has-tooltip" aria-hidden="true" title="{{ lang.tr('message.reply_tooltip') }}"></span></small> {%- endif %}
-        <b><a href="{{ url_for('route_profile', username = username) }}">{{ displayname }}</a></b> &middot; ~{{ username }}</small>
+        <b><a href="{{ url_for('route_profile', username = username) }}">{{ displayname }}</a></b> &middot; ~{{ username }}{%- if is_private %} &middot; <b>{{ lang.tr("profile.private") }}</b>{%- endif %}{%- if is_banned %} &middot; <b>{{ lang.tr("profile.banned") }}</b>{%- endif %}</small>
         {%- endif %}
-        <small class="text-muted">{{ msg.get_date_iso() }}</small>
+        <small class="text-muted" title="{{ msg.get_date_iso() }}">{{ msg.get_date_iso() }}</small>
     </div>
     {%- if extra.disable_message_link %}
     <div class="mb-1 {{ 'whitespace-preserve' if extra.pre_wrap else 'whitespace-wrap' }}">{{ format_links(escape_html(msg.get_text())) | safe }}</div>
@@ -32,14 +36,14 @@
         &middot; 
         <form class="inline" action="{{ url_for('route_toggle_like') }}" method="POST"><input type="hidden" name="next" value="{{ request.path + prefix_nonempty('?', request.query_string.decode('utf-8', 'ignore')) }}" />
         <input type="hidden" name="mid" value="{{ msg.get_id() }}" />
-        <span class="fa {{ 'fa-heart' if current_user.has_liked_message(msg) else 'fa-heart-o' }}" aria-hidden="true"></span> 
-        <a href="javascript:void(0)" onclick="this.parentNode.submit()">{{ lang.tr('message.unlike' if current_user.has_liked_message(msg) else 'message.like') }} ({{ likes }})</a></form> 
-        {%- if (current_user.get_id() == user.get_id()) and msg.can_be_edited() %}
+        <span class="fa {{ 'fa-heart' if has_liked else 'fa-heart-o' }}" aria-hidden="true"></span> 
+        <a href="javascript:void(0)" onclick="this.parentNode.submit()">{{ lang.tr('message.unlike' if has_liked else 'message.like') }} ({{ likes }})</a></form> 
+        {%- if (current_user.get_id() == userid) and msg.can_be_edited() %}
         &middot; 
         <span class="fa fa-pencil" aria-hidden="true"></span> 
         <a href="{{ url_for('route_msg_edit') }}?msg={{ msg.get_id() }}">{{ lang.tr('message.edit') }}</a>
         {%- endif %}
-        {%- if current_user.get_id() == user.get_id() or current_user.has_admin_rights() %}
+        {%- if current_user.get_id() == userid or current_user.has_admin_rights() %}
         &middot; 
         <span class="fa fa-remove" aria-hidden="true"></span> 
         <a href="javascript:void(0)" data-toggle="modal" data-target="#deleteModal{{ msg.get_id() }}">{{ lang.tr('message.delete') }}</a>
@@ -51,7 +55,7 @@
 {%- endif %}
     </small>
 </div>
-{%- if current_user.is_authenticated and (current_user.get_id() == user.get_id() or current_user.has_admin_rights()) %}
+{%- if current_user.is_authenticated and (current_user.get_id() == userid or current_user.has_admin_rights()) %}
 <div class="modal fade" id="deleteModal{{ msg.get_id() }}" tabindex="-1" role="dialog" aria-labelledby="deleteModal{{ msg.get_id() }}Label" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -64,6 +68,11 @@
             <div class="modal-body">
                 {{ lang.tr('message.deletemodal.text') }}
                 <br />
+                {%- if current_user.get_id() != userid %}
+                <br />
+                <b>{{ lang.tr('message.deletemodal.notyourmsg') }}</b>
+                <br />
+                {%- endif %}
                 <br />
                 "<i>{{ msg.get_text() }}</i>"
             </div>

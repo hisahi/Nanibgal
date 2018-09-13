@@ -35,8 +35,17 @@
     "profile.report": "Ilmianna",
     "profile.nomessages": "Tämä käyttäjä ei ole vielä kirjoittanut mitään.",
     "profile.messages_private": "Tämä käyttäjä on tehnyt viestistään yksityisiä.",
+    "profile.ban": "Langeta porttikielto",
+    "profile.unban": "Poista porttikielto",
+    "profile.private": "Yksityinen",
+    "profile.banned": "Porttikiellossa",
+    "profile.userhasbeenbanned.title": "Porttikiellossa",
+    "profile.userhasbeenbanned": "Et voi katsoa tämän käyttäjän profiilia, koska hän on porttikiellossa.",
 
     "feed.nomessages": "Syötteessäsi ei ole vielä mitään. Sekä sinun viestisi että seuraamiesi käyttäjien viestit näkyvät tässä.",
+    "feed.nextpage": "seuraava sivu",
+    "feed.prevpage": "edellinen sivu",
+    "feed.viewnewest": "näytä uusimmat",
 
     "message.reply": "Vastaa",
     "message.like": "Tykkää",
@@ -44,12 +53,14 @@
     "message.edit": "Muokkaa",
     "message.delete": "Poista",
     "message.likes": "Tykkäykset",
+    "message.notavailable": "Tämä viesti ei ole saatavilla.",
     "message.private": "Tämä viesti ei ole saatavilla, koska sen käyttäjä on asettanut viestinsä yksityisiksi.",
     "message.deleted": "Tämä viesti ei ole saatavilla, koska se on poistettu.",
     "message.is_reply": "Alla oleva viesti on vastaus yllä olevaan viestiin.",
     "message.reply_tooltip": "Tämä viesti on vastaus toiseen viestiin",
     "message.deletemodal.title": "Poista viesti",
     "message.deletemodal.text": "Haluatko varmasti poistaa tämän viestin?",
+    "message.deletemodal.notyourmsg": "Huom.: Et lähettänyt tätä viestiä, mutta voit poistaa sen, sillä olet valvoja.",
     "message.deletemodal.delete": "Poista",
     "message.deletemodal.cancel": "Peruuta",
 
@@ -61,6 +72,7 @@
     "newpost.submit": "Lähetä",
     "newpost.replyingtoabovemessage": "Vastaat yllä olevaan viestiin.",
     "newpost.error.empty_message": "Viestin sisältö ei voi olla tyhjä.",
+    "newpost.error.cannotreplytothis": "Et voi vastata tähän viestiin.",
 
     "editpost.title": "Muokkaa viestiä",
     "editpost.link": "Linkki",
@@ -76,6 +88,10 @@
     "reportuser.title": "Ilmianna käyttäjä",
 
     "reportmsg.title": "Ilmianna viesti",
+
+    "banned.title": "Porttikielto",
+    "banned.heading": "Tilisi on saanut porttikiellon",
+    "banned.text": "Ota yhteyttä valvojiin tai palvelimen omistajaan saadaksesi lisätietoja.",
 
     "settings.title": "Asetukset",
     "settings.success": "Asetukset tallennettu onnistuneesti.",

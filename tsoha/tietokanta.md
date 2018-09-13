@@ -21,14 +21,9 @@ CREATE TABLE users (
         registered TIMESTAMP WITHOUT TIME ZONE NOT NULL,
         is_admin BOOLEAN,
         banned BOOLEAN,
+        msgsareprivate BOOLEAN,
         config TEXT,
         PRIMARY KEY (userid)
-);
-
-CREATE TABLE tags (
-        tagid SERIAL NOT NULL,
-        tagname VARCHAR(32) NOT NULL,
-        PRIMARY KEY (tagid)
 );
 
 CREATE TABLE follows (
@@ -106,8 +101,6 @@ CREATE INDEX idx_user_from_id ON users (userid);
 CREATE INDEX idx_followeds_from_user ON follows (follower);
 CREATE INDEX idx_msgs_from_user ON msgs (author);
 CREATE INDEX idx_likes_from_msg ON likes (msg);
-CREATE INDEX idx_tags_from_msg ON msgtag (msg);
-CREATE INDEX idx_msgs_from_tag ON msgtag (tag);
 CREATE INDEX idx_notifs_from_user ON notifications (userid);
 
 ```

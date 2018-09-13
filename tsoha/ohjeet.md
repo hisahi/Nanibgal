@@ -7,6 +7,7 @@ Valmiina olevan Nanibgal-instanssin käyttö vaatii vain nykyaikaisen selaimen.
 
 Palvelinohjelmiston asennukseen ja käyttöön vaaditaan Python 3.5. pip:n
 kautta tulee asentaa requirements.txt-tiedostossa luetellut moduulit.
+Tarvitset myös PostgreSQL-tietokannan.
 
 Palvelinohjelmisto tulisi ensin määritellä muokkaamalla applications-
 kansion config.py-tiedostoa.
@@ -27,48 +28,48 @@ jälkeen tilin voi luoda.
 Syöte on oletusnäkymä kirjautuneille käyttäjille. Siinä näkyy viestiesi
 lisäksi seuraamiesi käyttäjien lähettämät viestit.
 
-There are two primary ways to find users to follow: you can either find
-user names from other services or from friends or use the search feature
-to find users and messages.
+Uusien seurattavien käyttäjien löytämiseen on kaksi päätapaa: voit etsiä
+käyttäjänimiä toisista palveluista tai kavereilta, tai käyttää haku-
+toimintoa löytääksesi käyttäjiä sekä viestejä.
 
 ## Profiili
-Your user profile can be opened with a link in the top bar (or menu)
-titled ~username, where username is your user name. To open someone
-else's profile, you can either use the search, or navigate to the
-feed and add /~username to the end of the address.
+Käyttäjäprofiilin voi löytää yläpalkin (tai valikon) linkistä ~-
+alkuisella linkillä, jonka perässä on käyttäjänimesi. Voit avata toisen
+henkilön profiiliin haun kautta tai siirtymällä syötteeseesi ja lisäämällä
+verkko-osoitteen loppuun /~ sarjan ja sen perään käyttäjänimen.
 
-You can edit aspects of your profile in the settings.
+Profiilia voi mukauttaa asetuksista.
 
 ## Viestit
-The main feature is creating posts. Posts may contain 256 characters
-of text in addition to a link, which is too restricted to 256 characters.
+Palvelun päätoimintoja on viestien kirjoittaminen. Niissä voi olla
+256 merkkiä tekstiä linkin lisäksi, joka sekin on rajoitettu 256 merkkiin.
 
-Messages can be edited within 10 minutes of their posting and deleted
-at any time.
+Viestejä voi muokata 10 minuutin sisällä niiden lähettämishetkestä ja
+poistaa milloin vain.
 
-It is also possible to reply to messages. In that case, the message,
-when opened, will show the message it is a reply to, as well as showing
-the replies to that given message.
+Viesteihin voi myös vastata. Siinä tapauksessa kun viestin avaa, se
+näyttää viestin, mihin se on itse vastaus, sekä myöskin siihen vastauksena
+olevat viestit.
 
 ## Ilmiantaminen
-Both users and messages can be reported. In such cases, administrators
-can review the reports and appropriately remove the messages as well as
-ban the users who sent them.
+Sekä käyttäjiä että viestejä voi ilmiantaa. Ilmiannon tapauksissa
+valvojat voivat käydä ilmiannot läpi ja joko poistaa viestit taikka
+antaa porttikieltoja ne lähettäneille käyttäjille.
 
 ## Asetukset
-User settings allow you to modify your profile, password and
-other settings.
+Käyttäjäasetukset antavat sinun muokata profiiliasi, muuttaa salasanaasi
+sekä mukauttaa muita asetuksia.
 
-In order to perform any changes, you must type your current password
-to the top field. The password can be changed by entering the new
-password into the password fields; if the fields are left empty, the
-password is not changed.
+Muokkausten tekemiseksi sinun tulee ensin syöttää nykyisen salasanasi
+ylälaidassa olevaan kenttään. Salasanan voi vaihtaa kirjoittamalla uuden
+salasanan niille suunniteltuun kenttään; jos kentät jätetään tyhjiksi,
+salasana jää ennalleen.
 
-The settings also allow you to delete your account. This is done by
-entering your user name and password into the field at the bottom of
-the settings page. Note that when an user is deleted from the system,
-all data associated with it is also deleted, such as the messages.
-The operation cannot be undone, so think twice about deleting your account.
+Asetuksissa on myös lomake käyttäjätilin poistoon. Tämä täytetään
+kirjoittamalla käyttäjänimi ja salasana asetussivun alalaidassa
+olevaan lomakkeeseen. Huomioithan, että kun käyttäjä poistetaan
+järjestelmästä, kaikki siihen liittyvä tieto, kuten viestit, poistetaan
+myös. Tätä toimintoa ei voi perua, joten harkitse asiaa ennen tilin poistoa.
 
 ## Paikallistaminen
-Nanibgal supports full localization of the user interface.
+Nanibgal tukee täyttä käyttöliittymän paikallistamista.

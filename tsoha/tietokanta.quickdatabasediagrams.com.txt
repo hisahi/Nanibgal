@@ -1,0 +1,59 @@
+users
+-
+userid pk .PK
+username String
+displayname String
+bio String
+email String
+passhash Binary
+registered Timestamp
+is_admin Boolean
+banned Boolean
+config String
+
+follows
+-
+follower .FK fk >- users.userid
+followed .FK fk >- users.userid
+
+msgs
+-
+msgid pk .PK
+author .FK fk >- users.userid
+contents String
+link String
+postdate Timestamp
+editdate Timestamp
+is_reply Boolean
+reply .FK fk >- msgs.msgid
+
+userreports
+-
+reportid pk .PK
+reported_by .FK fk >- users.userid
+user_reported .FK fk >- users.userid
+reason String
+reportdate Timestamp
+
+likes
+-
+user .FK fk >- users.userid
+msg .FK fk >- msgs.msgid
+
+msgreports
+-
+reportid pk .PK
+reported_by .FK fk >- users.userid
+msg_reported .FK fk >- msgs.msgid
+reason String
+reportdate Timestamp
+
+notifications
+-
+notifid pk .PK
+kind Integer
+userid .FK fk >- users.userid
+otheruserid .FK fk >- users.userid
+messageid .FK fk >- msgs.msgid
+notificationdate Timestamp
+unread Boolean

@@ -3,11 +3,29 @@
 {% block title %}~{{ user.get_user_name() }} - Nanibgal{% endblock %}
 
 {% block body %}
+
+{%- if user.is_banned() and (not current_user.is_authenticated or not current_user.has_admin_rights()) %}
+<h1>{{ lang.tr('profile.userhasbeenbanned.title') }}</h1>
+<p>{{ lang.tr('profile.userhasbeenbanned') }}</p>
+{%- else %}
 <div class="clearfix">
 <h1 class="float-left">{{ user.get_display_name() }}</h1>
 <h4 class="text-muted float-md-right">~{{ user.get_user_name() }}</h4>
 </div>
 {%- if current_user.is_authenticated and not user.get_id() == current_user.get_id() %}
+{%- if current_user.has_admin_rights() %}
+<form class="inline" action="{{ url_for('route_toggle_ban') }}" method="POST"><input type="hidden" name="uid" value="{{ user.get_id() }}" />
+<a href="javascript:void(0)" onclick="this.parentNode.submit()">{{ lang.tr('profile.unban' if user.is_banned() else 'profile.ban') }}</a></form>
+{%- if user.is_banned() %}
+&middot;
+<b>{{ lang.tr('profile.banned') }}</b>
+{%- endif %}
+&middot;
+{%- endif %}
+{%- if user.are_messages_private() %}
+<b>{{ lang.tr('profile.private') }}</b>
+&middot;
+{%- endif %}
 <form class="inline" action="{{ url_for('route_toggle_follow') }}" method="POST"><input type="hidden" name="uid" value="{{ user.get_id() }}" />
 <a href="javascript:void(0)" onclick="this.parentNode.submit()">{{ lang.tr('profile.unfollow' if current_user.is_following_id(user.get_id()) else 'profile.follow') }}</a></form>
 &middot;
@@ -28,4 +46,5 @@
 {%- endif %}
 {% endif %}
 </div>
+{%- endif %}
 {% endblock %}

@@ -12,11 +12,11 @@ from application.view.feed import compute_pages
 from application.view.msg import get_user_messages, get_feed_from_user
 from application.view.render import render_message, format_links
 from application.view.form import DeleteAccountForm, EditPostForm, LoginForm, RegisterForm, NewPostForm, SettingsForm
-from application.controller.messages import get_message_by_id, new_message, edit_message
 from application.controller.auth import login, register
+from application.controller.messages import get_message_by_id, new_message, edit_message, toggle_like
 from application.controller.reports import handle_user_report, handle_message_report
 from application.controller.settings import handle_settings, handle_delete_account
-from application.controller.users import get_user_by_id, get_user_by_name
+from application.controller.users import get_user_by_id, get_user_by_name, toggle_ban, toggle_follow
 
 # make urllib.parse available for Jinja
 app.jinja_env.globals.update(urllib = urllib)
@@ -33,7 +33,10 @@ def get_preferred_anon_lang(headers):
 
 def get_user_lang(headers, current_user):
     if not current_user.is_authenticated:
-        return get_preferred_anon_lang(headers)
+        try:
+            return get_preferred_anon_lang(headers)
+        except:
+            return "en"
     lang = current_user.get_language()
     if lang not in application.config.LANGUAGES:
         lang = "en"
@@ -44,28 +47,38 @@ def route_feed(): # 𒀭𒀭𒊺𒉀
     lang = Language(get_user_lang(request.headers, current_user))
     if not current_user.is_authenticated:
         return redirect(url_for("route_login"))
-    msgs, offset, next_page, prev_page = compute_pages(request.args, get_feed_from_user, current_user)
+    if current_user.is_authenticated and current_user.is_banned():
+        return render_template("banned.html", lang = lang)
+    msgs, next_page, prev_page = compute_pages(request.args, get_feed_from_user, current_user)
     return render_template("feed.html", lang = lang, msgs = msgs, 
                             render_message = bind1(render_message, lang), 
-                            prev_page = prev_page, next_page = next_page)
+                            prev_page = prev_page, next_page = next_page,
+                            has_before = "b" in request.args or "a" in request.args)
 
 @app.route("/~<username>")
 def route_profile(username):
     lang = Language(get_user_lang(request.headers, current_user))
+    if current_user.is_authenticated and current_user.is_banned():
+        return render_template("banned.html", lang = lang)
     user = get_user_by_name(username)
     if user == None:
         return abort(404)
-    msgs, offset, next_page, prev_page = compute_pages(request.args, get_user_messages, user, current_user)
+    msgs, next_page, prev_page = compute_pages(request.args, get_user_messages, user, current_user)
     return render_template("profile.html", lang = lang, user = user, msgs = msgs, 
                             render_message = bind1(render_message, lang), 
-                            prev_page = prev_page, next_page = next_page)
+                            prev_page = prev_page, next_page = next_page,
+                            has_before = "b" in request.args or "a" in request.args)
 
 @app.route("/~<username>/<int:postid>")
 def route_message(username, postid):
     lang = Language(get_user_lang(request.headers, current_user))
+    if current_user.is_authenticated and current_user.is_banned():
+        return render_template("banned.html", lang = lang)
     user = get_user_by_name(username)
     if user == None:
         return abort(404)
+    if user.is_banned() and (not current_user.is_authenticated or not current_user.has_admin_rights()):
+        return redirect(url_for("route_profile", username = username))
     msg = get_message_by_id(postid)
     if msg == None:
         return abort(404)
@@ -126,12 +139,16 @@ def route_register():
 @app.route("/search", methods = ["GET", "POST"])
 def route_search():
     lang = Language(get_user_lang(request.headers, current_user))
+    if current_user.is_authenticated and current_user.is_banned():
+        return render_template("banned.html", lang = lang)
     return render_template("search.html", lang = lang)
 
 @app.route("/new", methods = ["GET", "POST"])
 @login_required
 def route_new():
     lang = Language(get_user_lang(request.headers, current_user))
+    if current_user.is_banned():
+        return render_template("banned.html", lang = lang)
     error, oldform = None, None
     if request.method == "POST":
         lform = NewPostForm(request.form)
@@ -154,10 +171,42 @@ def route_new():
     return render_template("new.html", lang = lang, form = nform, oldform = oldform, 
                             reply = render_message(lang, msg), reply_id = reply_id, error = error)
 
+@app.route("/edit", methods = ["GET", "POST"])
+@login_required
+def route_msg_edit():
+    lang = Language(get_user_lang(request.headers, current_user))
+    if current_user.is_authenticated and current_user.is_banned():
+        return render_template("banned.html", lang = lang)
+    error, oldform = None, None
+    if request.method == "POST":
+        lform = EditPostForm(request.form)
+        if lform.validate():
+            error = edit_message(current_user.get_id(), request.form)
+            if error:
+                error = lang.tr(error)
+            else:
+                return redirect(url_for("route_message", username = current_user.get_user_name(), postid = request.form["msg"]))
+        else:
+            oldform = lform
+    test_msg_id = request.args.get("msg", default = None)
+    try:
+        msg = get_message_by_id(int(test_msg_id))
+        if msg.get_author_id() != current_user.get_id():
+            return abort(403)
+    except:
+        return redirect(url_for("route_feed"))
+    nform = EditPostForm().localized(lang)
+    if oldform == None:
+        oldform = nform
+    return render_template("edit.html", lang = lang, form = nform, oldform = oldform, 
+                                msg = msg, error = error, render_message = bind1(render_message, lang))
+
 @app.route("/settings", methods = ["GET", "POST"])
 @fresh_login_required
 def route_settings():
     lang = Language(get_user_lang(request.headers, current_user))
+    if current_user.is_banned():
+        return render_template("banned.html", lang = lang)
     error, oldform, success = None, None, False
     if request.method == "POST":
         lform = SettingsForm(request.form).localized(lang)
@@ -187,60 +236,55 @@ def route_settings():
 @app.route("/follow", methods = ["POST"])
 @login_required
 def route_toggle_follow():
+    if current_user.is_banned():
+        return abort(403)
     form = request.form
     if form["uid"] == current_user.get_id():
         return abort(400)
     other_user = get_user_by_id(form["uid"])
-    if other_user == None:
-        return abort(400)
-    current_user.toggle_follow(other_user)
-    return redirect(url_for("route_profile", username = other_user.get_user_name()))
+    code = toggle_follow(current_user, other_user)
+    if code == 200:
+        return redirect(url_for("route_profile", username = other_user.get_user_name()))
+    else:
+        return abort(code)
+
+@app.route("/ban", methods = ["POST"])
+@login_required
+def route_toggle_ban():
+    if current_user.is_banned():
+        return abort(403)
+    form = request.form
+    if not current_user.has_admin_rights():
+        return abort(403)
+    other_user = get_user_by_id(form["uid"])
+    code = toggle_ban(other_user)
+    if code == 200:
+        return redirect(url_for("route_profile", username = other_user.get_user_name()))
+    else:
+        return abort(code)
 
 @app.route("/like", methods = ["POST"])
 @login_required
 def route_toggle_like():
+    if current_user.is_banned():
+        return abort(403)
     form = request.form
     msg_id = form["mid"]
     try:
         msg = get_message_by_id(int(msg_id))
     except:
         return abort(400)
-    if msg == None:
+    code = toggle_like(current_user, msg)
+    if code == 200:
         return redirect(get_safe_url(request.host_url, request.form["next"] or url_for("route_feed"), url_for("route_feed")))
-    current_user.toggle_like(msg)
-    return redirect(get_safe_url(request.host_url, request.form["next"] or url_for("route_feed"), url_for("route_feed")))
-
-@app.route("/edit", methods = ["GET", "POST"])
-@login_required
-def route_msg_edit():
-    lang = Language(get_user_lang(request.headers, current_user))
-    error, oldform = None, None
-    if request.method == "POST":
-        lform = EditPostForm(request.form)
-        if lform.validate():
-            error = edit_message(current_user.get_id(), request.form)
-            if error:
-                error = lang.tr(error)
-            else:
-                return redirect(url_for("route_message", username = current_user.get_user_name(), postid = request.form["msg"]))
-        else:
-            oldform = lform
-    test_msg_id = request.args.get("msg", default = None)
-    try:
-        msg = get_message_by_id(int(test_msg_id))
-        if msg.get_author_id() != current_user.get_id():
-            return abort(403)
-    except:
-        return redirect(url_for("route_feed"))
-    nform = EditPostForm().localized(lang)
-    if oldform == None:
-        oldform = nform
-    return render_template("edit.html", lang = lang, form = nform, oldform = oldform, 
-                                msg = msg, error = error, render_message = bind1(render_message, lang))
+    else:
+        return abort(code)
 
 @app.route("/msg_delete", methods = ["POST"])
 @login_required
 def route_msg_delete():
+    if current_user.is_banned():
+        return abort(403)
     form = request.form
     mid = form["mid"]
     msg = get_message_by_id(mid)
@@ -265,6 +309,8 @@ def route_delete_account():
 @login_required
 def route_report_user():
     lang = Language(get_user_lang(request.headers, current_user))
+    if current_user.is_banned():
+        return render_template("banned.html", lang = lang)
     if request.method == "POST":
         error = handle_user_report(current_user.get_id(), request.form)
         return render_template("report_ok.html")

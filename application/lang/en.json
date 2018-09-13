@@ -35,8 +35,17 @@
     "profile.report": "Report",
     "profile.nomessages": "This user has not posted anything yet.",
     "profile.messages_private": "This user has made their messages private.",
+    "profile.ban": "Ban",
+    "profile.unban": "Unban",
+    "profile.private": "Private",
+    "profile.banned": "Banned",
+    "profile.userhasbeenbanned.title": "Banned",
+    "profile.userhasbeenbanned": "You cannot view this profile, as the user has been banned.",
 
     "feed.nomessages": "No messages on your feed. Your messages and the messages of people you follow will show up here.",
+    "feed.nextpage": "next page",
+    "feed.prevpage": "previous page",
+    "feed.viewnewest": "view newest",
 
     "message.reply": "Reply",
     "message.like": "Like",
@@ -44,12 +53,14 @@
     "message.edit": "Edit",
     "message.delete": "Delete",
     "message.likes": "Likes",
+    "message.notavailable": "The message is not available.",
     "message.private": "The message is not available, as its user has set their messages to be private.",
     "message.deleted": "The message is not available, as it has been deleted.",
     "message.is_reply": "The message below is a reply to the message above.",
     "message.reply_tooltip": "This message is a reply to another message",
     "message.deletemodal.title": "Delete post",
     "message.deletemodal.text": "Are you sure you want to delete this post?",
+    "message.deletemodal.notyourmsg": "Note: you did not post this message, but can delete it, as you are an administrator.",
     "message.deletemodal.delete": "Delete",
     "message.deletemodal.cancel": "Cancel",
 
@@ -61,6 +72,7 @@
     "newpost.submit": "Post",
     "newpost.replyingtoabovemessage": "You are replying to the message above.",
     "newpost.error.empty_message": "The message text cannot be empty.",
+    "newpost.error.cannotreplytothis": "You cannot reply to this message.",
 
     "editpost.title": "Edit message",
     "editpost.link": "Link",
@@ -76,6 +88,10 @@
     "reportuser.title": "Report user",
 
     "reportmsg.title": "Report message",
+
+    "banned.title": "Banned",
+    "banned.heading": "Your account has been banned",
+    "banned.text": "Contact the administrators or server owner for more information.",
 
     "settings.title": "Settings",
     "settings.success": "The settings have been saved successfully.",

@@ -12,11 +12,6 @@ table_Likes = db.Table("likes",
     Column("msg", Integer, ForeignKey("msgs.msgid", ondelete = "CASCADE"))
 )
 
-table_MsgTag = db.Table("msgtag",
-    Column("msg", Integer, ForeignKey("msgs.msgid", ondelete = "CASCADE")),
-    Column("tag", Integer, ForeignKey("tags.tagid", ondelete = "CASCADE"))
-)
-
 table_Follows = db.Table("follows",
     Column("follower", Integer, ForeignKey("users.userid", ondelete = "CASCADE")),
     Column("followed", Integer, ForeignKey("users.userid", ondelete = "CASCADE"))
@@ -33,6 +28,7 @@ class User(db.Model):
     registered = Column(DateTime, nullable = False, default = func.current_timestamp())
     is_admin = Column(Boolean, default = False)
     banned = Column(Boolean, default = False)
+    msgsareprivate = Column(Boolean, default = False)
     config = Column(Text, default = False)
 
     messages = relationship("Message")
@@ -44,8 +40,7 @@ class User(db.Model):
         self.displayname = username
         self.email = email
         self.config = self.get_default_config()
-        self.is_admin = False
-        self.banned = False
+        self.is_admin = self.banned = self.msgsareprivate = False
         self.change_password(password)
 
     def add_itself(self):
@@ -90,22 +85,16 @@ class User(db.Model):
     def get_default_config(self):
         settings = {}
         settings["follows_are_private"] = False
-        settings["messages_are_private"] = False
         settings["likes_are_private"] = False
         settings["language"] = "en"
         return json.dumps(settings)
     
+    def are_messages_private(self):
+        return self.msgsareprivate
+    
     def are_follows_private(self):
         try:
             return bool(json.loads(self.config)["follows_are_private"])
-        except:
-            self.config = self.get_default_config()
-            self.update()
-            return False
-    
-    def are_messages_private(self):
-        try:
-            return bool(json.loads(self.config)["messages_are_private"])
         except:
             self.config = self.get_default_config()
             self.update()
@@ -148,11 +137,11 @@ class User(db.Model):
         settings[key] = value
         self.config = json.dumps(settings)
 
+    def set_messages_private(self, value):
+        self.msgsareprivate = value
+
     def set_follows_private(self, value):
         self.set_config_flag("follows_are_private", value)
-
-    def set_messages_private(self, value):
-        self.set_config_flag("messages_are_private", value)
 
     def set_likes_private(self, value):
         self.set_config_flag("likes_are_private", value)
@@ -168,44 +157,56 @@ class User(db.Model):
     def set_user_bio(self, bio):
         self.bio = bio[:256]
 
-    def get_user_messages(self, current_user, limit, offset):
+    def get_user_messages(self, current_user, limit, before, after):
         # return {"msg": message object, "has_liked": has_this_user_liked, "likes": number_of_likes, "replies": number_of_replies}
-        if self.are_messages_private() and self.userid != current_user.userid:
+        # return empty if user is banned or set messages as private, unless the current user is themselves or an admin
+        rev = before != None
+        if (self.are_messages_private() or self.is_banned()) and (not current_user.is_authenticated or (self.userid != current_user.userid and not current_user.has_admin_rights())):
             return []
-        stmt = text("SELECT msgs.msgid, msgs.author, msgs.contents, "
-                  + "msgs.link, msgs.postdate, msgs.editdate, msgs.is_reply, "
-                  + "msgs.reply, COUNT(CASE WHEN likes.user = :userid THEN "
-                  + "likes.user ELSE NULL END), COUNT(likes.user), COUNT(r.msgid) "
-                  + "FROM msgs LEFT JOIN likes ON likes.msg = msgs.msgid "
-                  + "LEFT JOIN msgs r ON r.reply = msgs.msgid WHERE msgs.author = "
-                  + ":userid GROUP BY msgs.msgid ORDER BY msgs.postdate DESC "
-                  + "LIMIT :limit OFFSET :offset"
-                  ).params(userid = self.userid, offset = offset, limit = limit)
+        stmt = text(("SELECT msgs.msgid, msgs.author, msgs.contents, "
+                   + "msgs.link, msgs.postdate, msgs.editdate, msgs.is_reply, "
+                   + "msgs.reply, COUNT(CASE WHEN likes.user = :userid THEN "
+                   + "likes.user ELSE NULL END), COUNT(likes.user), COUNT(r.msgid) "
+                   + "FROM msgs LEFT JOIN likes ON likes.msg = msgs.msgid "
+                   + "LEFT JOIN msgs r ON r.reply = msgs.msgid WHERE msgs.author = "
+                   + ":userid {} GROUP BY msgs.msgid ORDER BY msgs.postdate " 
+                   + ("ASC" if rev else "DESC") + " LIMIT :limit"
+                   ).format("AND msgs.msgid >= :before" if before != None else 
+                           ("AND msgs.msgid <= :after" if after != None else ""))
+                   ).params(userid = self.userid, limit = limit, before = before, after = after)
         res = db.engine.execute(stmt)
         msgs = []
         for row in res:
             msgs.append({"msg": Message.reconstruct(row[:8]), "has_liked": row[8] > 0, "likes": row[9], "replies": row[10]})
+        if rev:
+            msgs = msgs[::-1]
         return msgs
 
-    def get_feed(self, limit, offset):
-        # return {"msg": message object, "user": sent_user, "has_liked": has_this_user_liked, "likes": number_of_likes, "replies": number_of_replies}
-        stmt = text("SELECT m.msgid, m.author, m.contents, m.link, m.postdate, "
-                  + "m.editdate, m.is_reply, m.reply, u.userid, COUNT(CASE "
-                  + "WHEN likes.user = :userid THEN likes.user ELSE NULL END), "
-                  + "COUNT(likes.user), COUNT(r.msgid) FROM follows f JOIN msgs "
-                  + "m ON (m.author = f.followed) JOIN users u ON (u.userid = "
-                  + "m.author) LEFT JOIN likes ON likes.msg = m.msgid "
-                  + "LEFT JOIN msgs r ON r.reply = m.msgid WHERE f.follower = "
-                  + ":userid GROUP BY m.msgid, u.userid ORDER BY m.postdate "
-                  + "DESC LIMIT :limit OFFSET :offset"
-                  ).params(userid = self.userid, offset = offset, limit = limit)
+    def get_feed(self, limit, before, after):
+        # return {"msg": message object, "user": {"userid": ..., "username": ..., "displayname": ...}, "has_liked": has_this_user_liked, "likes": number_of_likes, "replies": number_of_replies}
+        # strip out messages that are sent by banned users or users who have set messages as private, except if the current user is them
+        rev = before != None
+        stmt = text(("SELECT m.msgid, m.author, m.contents, m.link, m.postdate, "
+                   + "m.editdate, m.is_reply, m.reply, u.userid, u.username, "
+                   + "u.displayname, COUNT(CASE WHEN likes.user = :userid THEN "
+                   + "likes.user ELSE NULL END), COUNT(likes.user), "
+                   + "COUNT(r.msgid) FROM follows f JOIN msgs m ON (m.author = "
+                   + "f.followed) JOIN users u ON (u.userid = m.author) LEFT "
+                   + "JOIN likes ON likes.msg = m.msgid LEFT JOIN msgs r ON "
+                   + "r.reply = m.msgid WHERE f.follower = :userid AND "
+                   + "(u.userid = :userid OR (u.banned = false AND "
+                   + "u.msgsareprivate = false)) {} GROUP BY m.msgid, u.userid "
+                   + "ORDER BY m.postdate " + ("ASC" if rev else "DESC") 
+                   + " LIMIT :limit"
+                   ).format("AND m.msgid >= :before" if before != None else 
+                           ("AND m.msgid <= :after" if after != None else ""))
+                   ).params(userid = self.userid, limit = limit, before = before, after = after)
         res = db.engine.execute(stmt)
         msgs = []
         for row in res:
-            usr = User.query.filter_by(userid = row[8]).first()
-            if usr != None:
-                if not usr.are_messages_private() or usr.userid == self.userid:
-                    msgs.append({"msg": Message.reconstruct(row[:8]), "user": usr, "has_liked": row[9] > 0, "likes": row[10], "replies": row[11]})
+            msgs.append({"msg": Message.reconstruct(row[:8]), "user": {"userid": row[8], "username": row[9], "displayname": row[10]}, "has_liked": row[11] > 0, "likes": row[12], "replies": row[13]})
+        if rev:
+            msgs = msgs[::-1]
         return msgs
 
     def is_following_id(self, uid):
@@ -229,6 +230,10 @@ class User(db.Model):
                                 follower = self.userid,
                                 followed = user.userid))
             db.session.commit()
+
+    def toggle_ban(self):
+        self.banned = not self.banned
+        self.update()
 
     def has_liked_message(self, message):
         return (db.session.query(table_Likes.c.user)
@@ -341,27 +346,6 @@ class Message(db.Model):
     def get_total_replies(self):
         return Message.query.filter_by(reply = self.msgid).count()
 
-class Tag(db.Model):
-    __tablename__ = "tags"
-    tagid = Column(Integer, primary_key = True)
-    tagname = Column(String(32), nullable = False)
-
-    messages = relationship("Message", secondary = table_MsgTag, backref = db.backref("tags", lazy="dynamic"), lazy="dynamic")
-
-    def __init__(self, name):
-        self.tagname = name
-
-    def add_itself(self):
-        db.session.add(self)
-        db.session.commit()
-
-    def terminate(self):
-        db.session.delete(self)
-        db.session.commit()
-
-    def update(self):
-        db.session.commit()
-
 class ReportUser(db.Model):
     __tablename__ = "userreports"
     reportid = Column(Integer, primary_key = True)
@@ -431,19 +415,27 @@ class Notification(db.Model):
 
     @classmethod
     def follow_notification(cls, user, follower):
-        return cls(0, user, follower)
+        if user.is_banned():
+            return None
+        return cls(0, user.get_id(), follower)
 
     @classmethod
     def like_notification(cls, user, liked_by, liked_msg):
-        return cls(1, user, liked_by, liked_msg)
+        if user.is_banned():
+            return None
+        return cls(1, user.get_id(), liked_by, liked_msg)
 
     @classmethod
     def reply_notification(cls, user, reply_by, reply_to_msg):
-        return cls(2, user, reply_by, reply_to_msg)
+        if user.is_banned():
+            return None
+        return cls(2, user.get_id(), reply_by, reply_to_msg)
 
     @classmethod
     def mention_notification(cls, user, mention_by, mention_in_msg):
-        return cls(3, user, mention_by, mention_in_msg)
+        if user.is_banned():
+            return None
+        return cls(3, user.get_id(), mention_by, mention_in_msg)
 
     def add_itself(self):
         db.session.add(self)
@@ -464,6 +456,4 @@ db.Index("idx_msgs_from_user", Message.author)
 db.Index("idx_user_from_id", User.userid)
 db.Index("idx_followeds_from_user", table_Follows.c.follower)
 db.Index("idx_likes_from_msg", table_Likes.c.msg)
-db.Index("idx_tags_from_msg", table_MsgTag.c.msg)
-db.Index("idx_msgs_from_tag", table_MsgTag.c.tag)
 db.Index("idx_notifs_from_user", Notification.userid)

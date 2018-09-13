@@ -21,9 +21,14 @@ def new_message(uid, request):
         link = link[:256]
     if type(reply) in [int, str]:
         reply = int(reply)
-        if not get_message_by_id(reply):
+        msg = get_message_by_id(reply)
+        if msg == None:
             # if reply does not exist, just ignore
             reply = None
+        else:
+            author = msg.get_author()
+            if author.are_messages_private() or author.is_banned():
+                return (None, "newpost.error.cannotreplytothis")
     else:
         reply = None
     msg = application.models.Message(uid, contents, link, reply)
@@ -54,3 +59,8 @@ def edit_message(uid, request):
     editable.edit_message(contents, link)
     return None
     
+def toggle_like(user, msg):
+    if msg == None:
+        return 400
+    user.toggle_like(msg)
+    return 200

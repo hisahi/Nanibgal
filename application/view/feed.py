@@ -1,17 +1,29 @@
 
+MSGS_PER_PAGE = 25
+
 # (request.args, msgs_func, *func_args) -> (msgs, offset, next_page, prev_page)
 def compute_pages(args, msgs_func, *func_args):
     try:
-        offset = int(args.get("p", 0))
+        before = max(0, int(args.get("b", None)))
     except:
-        offset = 0
-    if offset < 0:
-        offset = 0
-    msgs = msgs_func(*func_args, limit = 25 + 1, offset = offset)
+        before = None
+    try:
+        after = max(0, int(args.get("a", None)))
+    except:
+        after = None
+    msgs = msgs_func(*func_args, limit = MSGS_PER_PAGE + 1, before = before, after = after)
     next_page, prev_page = None, None
-    if offset > 0:
-        prev_page = max(0, offset - 25)
-    if len(msgs) > 25:
-        next_page = offset + 25
-    msgs = msgs[:25]
-    return msgs, offset, next_page, prev_page
+    if before != None or after != None:
+        prev_page = msgs[0]["msg"].get_id()
+        # fetch newest possible ID, if equals prev_page set None
+        newest = msgs_func(*func_args, limit = 1, before = None, after = None)
+        if newest:
+            newest_id = newest[0]["msg"].get_id()
+            if newest_id <= prev_page:
+                prev_page = None
+        else:
+            prev_page = None
+    if len(msgs) > MSGS_PER_PAGE:
+        next_page = msgs[MSGS_PER_PAGE]["msg"].get_id()
+    msgs = msgs[:MSGS_PER_PAGE]
+    return msgs, next_page, prev_page
