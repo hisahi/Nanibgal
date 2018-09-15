@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}{{ lang.tr('reportmsg.title') }} - Nanibgal{% endblock %}
+
+{% block body %}
+<h1>{{ lang.tr('reportmsg.title') }}</h1>
+{%- if error is not none %}
+<div class="alert alert-danger" role="alert">{{ error }}</div>
+{%- endif %}
+{%- if success %}
+<div class="alert alert-success" role="alert">{{ lang.tr('reportmsg.success') }}</div>
+{%- else %}
+<form method="POST" action="{{ url_for('route_report_msg') }}?mid={{ msg_id }}">
+    {{ form.msg(hidden=True, value=msg_id ) }}
+    <div class="form-group row">
+        <label for="verify" class="col-4 col-form-label">{{ form.reason.label }}</label>
+        <div class="col-8">
+            {{ form.reason(class="form-control", required=True) }}
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="offset-sm-4 col-sm-8">
+            <button type="submit" class="btn btn-primary" >{{ lang.tr('reportmsg.submit') }}</button>
+        </div>
+    </div>
+    {{ form.csrf_token }}
+</form>
+{%- endif %}
+{% endblock %}

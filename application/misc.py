@@ -40,6 +40,24 @@ def generate_language_list(lang):
             result.append((key, "{} [{}]".format(available_langs[key], key)))
     return result
 
+def generate_list_from(lang, values, prefix):
+    result = []
+    for key in values:
+        val = prefix + key
+        if lang:
+            result.append((val, lang.tr(val)))
+        else:
+            result.append((val, val))
+    return result
+
+# generates a list of user report reasons
+def generate_user_report_reason_list(lang):
+    return generate_list_from(lang, application.config.USER_REPORT_REASONS, "reportuser.reason.")
+
+# generates a list of message report reasons
+def generate_msg_report_reason_list(lang):
+    return generate_list_from(lang, application.config.MSG_REPORT_REASONS, "reportmsg.reason.")
+
 # takes a dict, converts it to a format accepted by the FlaskForm constructor as obj
 class populate_dict():
     def __init__(self, data):

@@ -48,6 +48,11 @@
         <span class="fa fa-remove" aria-hidden="true"></span> 
         <a href="javascript:void(0)" data-toggle="modal" data-target="#deleteModal{{ msg.get_id() }}">{{ lang.tr('message.delete') }}</a>
         {%- endif %}
+        {%- if current_user.get_id() != userid %}
+        &middot; 
+        <span class="fa fa-flag" aria-hidden="true"></span> 
+        <a href="{{ url_for('route_report_msg') }}?mid={{ msg.get_id() }}">{{ lang.tr('message.report') }}</a>
+        {%- endif %}
 {%- else %}
         &middot; 
         <span class="fa fa-heart-o" aria-hidden="true"></span> 

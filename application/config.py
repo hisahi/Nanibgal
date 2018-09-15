@@ -19,3 +19,9 @@ PORT = 5000
 LANGUAGES = {"en": "English", "fi": "Suomi"}
 if DEBUG:
     LANGUAGES["qqx"] = "language.string.codes"
+
+# Report reasons; these are considered translation strings
+# For example, user report reason "test" is under "reportuser.reason.test"
+# while message report reason "test" is under "reportmsg.reason.test"
+USER_REPORT_REASONS = ["inappropriate", "impersonation", "spam"]
+MSG_REPORT_REASONS = ["inappropriate", "spam", "privacyviolation", "copyright"]

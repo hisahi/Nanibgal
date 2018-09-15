@@ -2,7 +2,7 @@
 from flask_wtf import FlaskForm
 from wtforms import IntegerField, SelectField, StringField, TextAreaField, PasswordField, BooleanField, validators
 
-from application.misc import generate_language_list
+from application.misc import generate_language_list, generate_user_report_reason_list, generate_msg_report_reason_list
 
 class LoginForm(FlaskForm):
     username = StringField("User name", [validators.Length(min=4, max=20, message="register.error.invalid_username_length")])
@@ -81,4 +81,22 @@ class EditPostForm(FlaskForm):
 
     def localized(self, lang):
         self.link.label = lang.tr("editpost.link")
+        return self
+
+class ReportUserForm(FlaskForm):
+    user = IntegerField("user")
+    reason = SelectField("reason", choices = generate_user_report_reason_list(None))
+
+    def localized(self, lang):
+        self.reason.label = lang.tr("reportuser.reason")
+        self.reason.choices = generate_user_report_reason_list(lang)
+        return self
+
+class ReportPostForm(FlaskForm):
+    msg = IntegerField("msg")
+    reason = SelectField("reason", choices = generate_msg_report_reason_list(None))
+
+    def localized(self, lang):
+        self.reason.label = lang.tr("reportmsg.reason")
+        self.reason.choices = generate_msg_report_reason_list(lang)
         return self

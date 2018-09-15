@@ -15,7 +15,7 @@
 {%- if current_user.is_authenticated and not user.get_id() == current_user.get_id() %}
 {%- if current_user.has_admin_rights() %}
 <form class="inline" action="{{ url_for('route_toggle_ban') }}" method="POST"><input type="hidden" name="uid" value="{{ user.get_id() }}" />
-<a href="javascript:void(0)" onclick="this.parentNode.submit()">{{ lang.tr('profile.unban' if user.is_banned() else 'profile.ban') }}</a></form>
+<span class="fa fa-ban" aria-hidden="true"></span> <a href="javascript:void(0)" onclick="this.parentNode.submit()">{{ lang.tr('profile.unban' if user.is_banned() else 'profile.ban') }}</a></form>
 {%- if user.is_banned() %}
 &middot;
 <b>{{ lang.tr('profile.banned') }}</b>
@@ -27,9 +27,13 @@
 &middot;
 {%- endif %}
 <form class="inline" action="{{ url_for('route_toggle_follow') }}" method="POST"><input type="hidden" name="uid" value="{{ user.get_id() }}" />
-<a href="javascript:void(0)" onclick="this.parentNode.submit()">{{ lang.tr('profile.unfollow' if current_user.is_following_id(user.get_id()) else 'profile.follow') }}</a></form>
+{%- if current_user.is_following_id(user.get_id()) %}
+<span class="fa fa-minus" aria-hidden="true"></span> <a href="javascript:void(0)" onclick="this.parentNode.submit()">{{ lang.tr('profile.unfollow') }}</a></form>
+{%- else %}
+<span class="fa fa-plus" aria-hidden="true"></span> <a href="javascript:void(0)" onclick="this.parentNode.submit()">{{ lang.tr('profile.follow') }}</a></form>
+{%- endif %}
 &middot;
-<a href="{{ url_for('route_report_user') }}?uid={{ user.get_id() }}">{{ lang.tr('profile.report') }}</a></form>
+<span class="fa fa-flag" aria-hidden="true"></span> <a href="{{ url_for('route_report_user') }}?uid={{ user.get_id() }}">{{ lang.tr('profile.report') }}</a>
 {%- endif %}
 <div>
 <p class="font-italic pre-wrap">{{ user.get_user_bio() }}</p>

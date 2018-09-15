@@ -11,7 +11,7 @@ from application.i18n import Language
 from application.view.feed import compute_pages
 from application.view.msg import get_user_messages, get_feed_from_user
 from application.view.render import render_message, format_links
-from application.view.form import DeleteAccountForm, EditPostForm, LoginForm, RegisterForm, NewPostForm, SettingsForm
+from application.view.form import DeleteAccountForm, EditPostForm, LoginForm, RegisterForm, ReportPostForm, ReportUserForm, NewPostForm, SettingsForm
 from application.controller.auth import login, register
 from application.controller.messages import get_message_by_id, new_message, edit_message, toggle_like
 from application.controller.reports import handle_user_report, handle_message_report
@@ -311,10 +311,47 @@ def route_report_user():
     lang = Language(get_user_lang(request.headers, current_user))
     if current_user.is_banned():
         return render_template("banned.html", lang = lang)
+    lform = ReportUserForm(request.form).localized(lang)
+    nform = ReportUserForm().localized(lang)
     if request.method == "POST":
-        error = handle_user_report(current_user.get_id(), request.form)
-        return render_template("report_ok.html")
-    return render_template("report_user.html", lang = lang)
+        if lform.validate():
+            error = handle_user_report(current_user.get_id(), request.form)
+            if error:
+                return render_template("reportuser.html", lang = lang, form = nform, error = error)
+            else:
+                return render_template("reportuser.html", lang = lang, success = True, error = None)
+        else:
+            error = lang.tr("reportuser.error.invalidform")
+    user_id = request.args.get("uid", default = None)
+    try:
+        user_id = int(user_id)
+    except:
+        return abort(400)
+    return render_template("reportuser.html", lang = lang, form = nform, user_id = user_id, error = None)
+
+@app.route("/reportmsg", methods = ["GET", "POST"])
+@login_required
+def route_report_msg():
+    lang = Language(get_user_lang(request.headers, current_user))
+    if current_user.is_banned():
+        return render_template("banned.html", lang = lang)
+    lform = ReportPostForm(request.form).localized(lang)
+    nform = ReportPostForm().localized(lang)
+    if request.method == "POST":
+        if lform.validate():
+            error = handle_message_report(current_user.get_id(), request.form)
+            if error:
+                return render_template("reportmsg.html", lang = lang, form = nform, error = lang.tr(error))
+            else:
+                return render_template("reportmsg.html", lang = lang, success = True, error = None)
+        else:
+            error = lang.tr("reportmsg.error.invalidform")
+    msg_id = request.args.get("mid", default = None)
+    try:
+        msg_id = int(msg_id)
+    except:
+        return abort(400)
+    return render_template("reportmsg.html", lang = lang, form = nform, msg_id = msg_id, error = None)
 
 @app.route("/logout")
 @login_required
