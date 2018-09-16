@@ -41,7 +41,14 @@ class User(db.Model):
         self.email = email
         self.config = self.get_default_config()
         self.is_admin = self.banned = self.msgsareprivate = False
-        self.change_password(password)
+        if password != None:
+            self.change_password(password)
+    
+    @staticmethod
+    def reconstruct(row):
+        user = User(None, None, None)
+        user.userid, user.username, user.displayname, user.bio, user.email, user.passhash, user.registered, user.is_admin, user.banned, user.msgsareprivate, user.config = row
+        return user
 
     def add_itself(self):
         db.session.add(self)
@@ -158,14 +165,12 @@ class User(db.Model):
         self.bio = bio[:256]
 
     def get_user_messages(self, current_user, limit, before, after):
-        # return {"msg": message object, "has_liked": has_this_user_liked, "likes": number_of_likes, "replies": number_of_replies}
+        # return {"id": message ID, "msg": message object, "has_liked": has_this_user_liked, "likes": number_of_likes, "replies": number_of_replies}
         # return empty if user is banned or set messages as private, unless the current user is themselves or an admin
         rev = before != None
         if (self.are_messages_private() or self.is_banned()) and (not current_user.is_authenticated or (self.userid != current_user.userid and not current_user.has_admin_rights())):
             return []
-        stmt = text(("SELECT msgs.msgid, msgs.author, msgs.contents, "
-                   + "msgs.link, msgs.postdate, msgs.editdate, msgs.is_reply, "
-                   + "msgs.reply, COUNT(CASE WHEN likes.user = :userid THEN "
+        stmt = text(("SELECT msgs.*, COUNT(CASE WHEN likes.user = :curid THEN "
                    + "likes.user ELSE NULL END), COUNT(likes.user), COUNT(r.msgid) "
                    + "FROM msgs LEFT JOIN likes ON likes.msg = msgs.msgid "
                    + "LEFT JOIN msgs r ON r.reply = msgs.msgid WHERE msgs.author = "
@@ -173,21 +178,20 @@ class User(db.Model):
                    + ("ASC" if rev else "DESC") + " LIMIT :limit"
                    ).format("AND msgs.msgid >= :before" if before != None else 
                            ("AND msgs.msgid <= :after" if after != None else ""))
-                   ).params(userid = self.userid, limit = limit, before = before, after = after)
+                   ).params(userid = self.userid, curid = current_user.get_id(), limit = limit, before = before, after = after)
         res = db.engine.execute(stmt)
         msgs = []
         for row in res:
-            msgs.append({"msg": Message.reconstruct(row[:8]), "has_liked": row[8] > 0, "likes": row[9], "replies": row[10]})
+            msgs.append({"id": row[0], "msg": Message.reconstruct(row[:8]), "has_liked": row[8] > 0, "likes": row[9], "replies": row[10]})
         if rev:
             msgs = msgs[::-1]
         return msgs
 
     def get_feed(self, limit, before, after):
-        # return {"msg": message object, "user": {"userid": ..., "username": ..., "displayname": ...}, "has_liked": has_this_user_liked, "likes": number_of_likes, "replies": number_of_replies}
+        # return {"id": message ID, "msg": message object, "user": {"userid": ..., "username": ..., "displayname": ...}, "has_liked": has_this_user_liked, "likes": number_of_likes, "replies": number_of_replies}
         # strip out messages that are sent by banned users or users who have set messages as private, except if the current user is them
         rev = before != None
-        stmt = text(("SELECT m.msgid, m.author, m.contents, m.link, m.postdate, "
-                   + "m.editdate, m.is_reply, m.reply, u.userid, u.username, "
+        stmt = text(("SELECT m.*, u.userid, u.username, "
                    + "u.displayname, COUNT(CASE WHEN likes.user = :userid THEN "
                    + "likes.user ELSE NULL END), COUNT(likes.user), "
                    + "COUNT(r.msgid) FROM follows f JOIN msgs m ON (m.author = "
@@ -204,10 +208,75 @@ class User(db.Model):
         res = db.engine.execute(stmt)
         msgs = []
         for row in res:
-            msgs.append({"msg": Message.reconstruct(row[:8]), "user": {"userid": row[8], "username": row[9], "displayname": row[10]}, "has_liked": row[11] > 0, "likes": row[12], "replies": row[13]})
+            msgs.append({"id": row[0], "msg": Message.reconstruct(row[:8]), "user": {"userid": row[8], "username": row[9], "displayname": row[10]}, "has_liked": row[11] > 0, "likes": row[12], "replies": row[13]})
         if rev:
             msgs = msgs[::-1]
         return msgs
+
+    def get_liked_messages(self, current_user, limit, before, after):
+        # return {"id": message ID, "msg": message object, "has_liked": has_this_user_liked, "likes": number_of_likes, "replies": number_of_replies}
+        # return empty if user is banned or set likes as private, unless the current user is themselves or an admin
+        rev = before != None
+        if (self.are_likes_private() or self.is_banned()) and (not current_user.is_authenticated or (self.userid != current_user.userid and not current_user.has_admin_rights())):
+            return []
+        stmt = text(("SELECT msgs.*, COUNT(CASE WHEN likes.user = :curid THEN "
+                   + "likes.user ELSE NULL END), COUNT(likes.user), "
+                   + "COUNT(r.msgid) FROM msgs LEFT JOIN likes ON likes.msg = "
+                   + "msgs.msgid LEFT JOIN msgs r ON r.reply = msgs.msgid WHERE "
+                   + "likes.user = :userid {} GROUP BY msgs.msgid ORDER BY " 
+                   + "msgs.postdate " + ("ASC" if rev else "DESC") + " LIMIT :limit"
+                   ).format("AND msgs.msgid >= :before" if before != None else 
+                           ("AND msgs.msgid <= :after" if after != None else ""))
+                   ).params(userid = self.userid, curid = current_user.get_id(), limit = limit, before = before, after = after)
+        res = db.engine.execute(stmt)
+        msgs = []
+        for row in res:
+            msgs.append({"id": row[0], "msg": Message.reconstruct(row[:8]), "has_liked": row[8] > 0, "likes": row[9], "replies": row[10]})
+        if rev:
+            msgs = msgs[::-1]
+        return msgs
+
+    def get_followed_users(self, limit, before, after):
+        # return users that this user follows
+        rev = before != None
+        if (self.are_follows_private() or self.is_banned()) and (not current_user.is_authenticated or (self.userid != current_user.userid and not current_user.has_admin_rights())):
+            return []
+        stmt = text(("SELECT users.* FROM users JOIN follows ON "
+                   + "follows.followed = users.userid WHERE follows.follower = "
+                   + ":userid AND users.userid <> :userid {} GROUP BY "
+                   + "users.userid ORDER BY users.userid " 
+                   + ("ASC" if rev else "DESC") + " LIMIT :limit"
+                   ).format("AND users.userid >= :before" if before != None else 
+                           ("AND users.userid <= :after" if after != None else ""))
+                   ).params(userid = self.userid, limit = limit, before = before, after = after)
+        res = db.engine.execute(stmt)
+        users = []
+        for row in res:
+            users.append({"id": row[0], "user": User.reconstruct(row[:11])})
+        if rev:
+            users = users[::-1]
+        return users
+
+    def get_followers(self, limit, before, after):
+        # return users that follow this user
+        rev = before != None
+        if (self.are_follows_private() or self.is_banned()) and (not current_user.is_authenticated or (self.userid != current_user.userid and not current_user.has_admin_rights())):
+            return []
+        stmt = text(("SELECT users.* FROM users JOIN follows ON "
+                   + "follows.follower = users.userid WHERE follows.followed = "
+                   + ":userid AND users.userid <> :userid {} GROUP BY "
+                   + "users.userid ORDER BY users.userid " 
+                   + ("ASC" if rev else "DESC") + " LIMIT :limit"
+                   ).format("AND users.userid >= :before" if before != None else 
+                           ("AND users.userid <= :after" if after != None else ""))
+                   ).params(userid = self.userid, limit = limit, before = before, after = after)
+        res = db.engine.execute(stmt)
+        users = []
+        for row in res:
+            users.append({"id": row[0], "user": User.reconstruct(row[:11])})
+        if rev:
+            users = users[::-1]
+        return users
 
     def is_following_id(self, uid):
         return (db.session.query(table_Follows.c.follower)

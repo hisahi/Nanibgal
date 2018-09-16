@@ -34,11 +34,26 @@
 {%- endif %}
 &middot;
 <span class="fa fa-flag" aria-hidden="true"></span> <a href="{{ url_for('route_report_user') }}?uid={{ user.get_id() }}">{{ lang.tr('profile.report') }}</a>
+&middot;
+{%- endif %}
+{%- if current_user.is_authenticated and not user.are_likes_private() %}
+<a href="{{ url_for('route_profile_likes', username = user.get_user_name()) }}">{{ lang.tr('profile.likes') }}</a>
+{%- endif %}
+{%- if current_user.is_authenticated and not user.are_follows_private() %}
+&middot;
+<a href="{{ url_for('route_profile_follows', username = user.get_user_name()) }}">{{ lang.tr('profile.follows') }}</a>
+&middot;
+<a href="{{ url_for('route_profile_followers', username = user.get_user_name()) }}">{{ lang.tr('profile.followers') }}</a>
 {%- endif %}
 <div>
 <p class="font-italic pre-wrap">{{ user.get_user_bio() }}</p>
 </div>
 <div class="list-group {{ (not msgs) and 'list-group-flush' or '' }}">
+{%- if prev_page %}
+<li class="list-group-item list-group-item-secondary"><a href="{{ url_for('route_profile', username = user.get_user_name()) + '?b={}'.format(prev_page) }}"><span class="fa fa-chevron-left" aria-hidden="true"></span> {{ lang.tr('feed.prevpage') }}</a></li>
+{%- elif has_before %}
+<li class="list-group-item list-group-item-secondary"><a href="{{ url_for('route_profile', username = user.get_user_name()) }}"><span class="fa fa-refresh" aria-hidden="true"></span> {{ lang.tr('feed.viewnewest') }}</a></li>
+{%- endif %}
 {% for msg in msgs %}
 {{ render_message(msg['msg'], has_liked = msg['has_liked'], likes = msg['likes'], replies = msg['replies'], disable_user_link = True) | safe }}
 {% endfor %}
@@ -49,6 +64,9 @@
 <li class="list-group-item">{{ lang.tr('profile.nomessages') }}</li>
 {%- endif %}
 {% endif %}
+{%- if next_page %}
+<li class="list-group-item list-group-item-secondary"><a href="{{ url_for('route_profile', username = user.get_user_name()) + '?a={}'.format(next_page) }}">{{ lang.tr('feed.nextpage') }} <span class="fa fa-chevron-right" aria-hidden="true"></span></a></li>
+{%- endif %}
 </div>
 {%- endif %}
 {% endblock %}

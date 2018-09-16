@@ -43,6 +43,10 @@ def render_message(lang, message, user = None, userid = None, username = None,
                                             replies = replies,
                                             extra = kw)
 
+def render_user(lang, user):
+    return render_template("user.html", lang = lang, 
+                                        user = user)
+
 # add links to ~username and #tag
 user_links = re.compile(r"~([A-Za-z_][0-9A-Za-z_]*)")
 tag_links = re.compile(r"(#[^\s#]+)")

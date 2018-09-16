@@ -1,0 +1,10 @@
+{%- if user.is_banned() and (not current_user.is_authenticated or not current_user.has_admin_rights()) %}
+<div class="list-group-item list-group-item-secondary flex-column align-items-start" data-message-id="{{ msg.get_id() }}">
+    {{ lang.tr('user.notavailable') }}
+</div>
+{%- else %}
+<div class="list-group-item flex-column align-items-start" data-user-id="{{ user.get_id() }}">
+    <h2><a href="{{ url_for('route_profile', username = user.get_user_name()) }}">{{ user.get_display_name() }}</a></h2>
+    <small class="text-muted">~{{ user.get_user_name() }}</small>
+</div>
+{%- endif %}

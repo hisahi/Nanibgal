@@ -9,9 +9,10 @@ from flask import render_template, request, redirect, url_for, abort
 from flask_login import current_user, login_required, login_user, logout_user, fresh_login_required
 from application.i18n import Language
 from application.view.feed import compute_pages
-from application.view.msg import get_user_messages, get_feed_from_user
-from application.view.render import render_message, format_links
+from application.view.msg import get_user_messages, get_feed_from_user, get_liked_messages
+from application.view.render import render_message, render_user, format_links
 from application.view.form import DeleteAccountForm, EditPostForm, LoginForm, RegisterForm, ReportPostForm, ReportUserForm, NewPostForm, SettingsForm
+from application.view.user import get_followed_users, get_followers
 from application.controller.auth import login, register
 from application.controller.messages import get_message_by_id, new_message, edit_message, toggle_like
 from application.controller.reports import handle_user_report, handle_message_report
@@ -66,6 +67,57 @@ def route_profile(username):
     msgs, next_page, prev_page = compute_pages(request.args, get_user_messages, user, current_user)
     return render_template("profile.html", lang = lang, user = user, msgs = msgs, 
                             render_message = bind1(render_message, lang), 
+                            prev_page = prev_page, next_page = next_page,
+                            has_before = "b" in request.args or "a" in request.args)
+
+@app.route("/~<username>/likes")
+@login_required
+def route_profile_likes(username):
+    lang = Language(get_user_lang(request.headers, current_user))
+    if current_user.is_authenticated and current_user.is_banned():
+        return render_template("banned.html", lang = lang)
+    user = get_user_by_name(username)
+    if user == None:
+        return abort(404)
+    if user.is_banned() and (not current_user.is_authenticated or not current_user.has_admin_rights()):
+        return redirect(url_for("route_profile", username = username))
+    msgs, next_page, prev_page = compute_pages(request.args, get_liked_messages, user, current_user)
+    return render_template("profile_likes.html", lang = lang, user = user, msgs = msgs, 
+                            render_message = bind1(render_message, lang), 
+                            prev_page = prev_page, next_page = next_page,
+                            has_before = "b" in request.args or "a" in request.args)
+
+@app.route("/~<username>/follows")
+@login_required
+def route_profile_follows(username):
+    lang = Language(get_user_lang(request.headers, current_user))
+    if current_user.is_authenticated and current_user.is_banned():
+        return render_template("banned.html", lang = lang)
+    user = get_user_by_name(username)
+    if user == None:
+        return abort(404)
+    if user.is_banned() and (not current_user.is_authenticated or not current_user.has_admin_rights()):
+        return redirect(url_for("route_profile", username = username))
+    users, next_page, prev_page = compute_pages(request.args, get_followed_users, user)
+    return render_template("profile_follows.html", lang = lang, user = user, users = users, 
+                            render_user = bind1(render_user, lang), 
+                            prev_page = prev_page, next_page = next_page,
+                            has_before = "b" in request.args or "a" in request.args)
+
+@app.route("/~<username>/followers")
+@login_required
+def route_profile_followers(username):
+    lang = Language(get_user_lang(request.headers, current_user))
+    if current_user.is_authenticated and current_user.is_banned():
+        return render_template("banned.html", lang = lang)
+    user = get_user_by_name(username)
+    if user == None:
+        return abort(404)
+    if user.is_banned() and (not current_user.is_authenticated or not current_user.has_admin_rights()):
+        return redirect(url_for("route_profile", username = username))
+    users, next_page, prev_page = compute_pages(request.args, get_followers, user)
+    return render_template("profile_followers.html", lang = lang, user = user, users = users, 
+                            render_user = bind1(render_user, lang), 
                             prev_page = prev_page, next_page = next_page,
                             has_before = "b" in request.args or "a" in request.args)
 

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}{{ lang.tr('profile.followstitle').replace("%u", user.get_user_name()) }} - Nanibgal{% endblock %}
+
+{% block body %}
+
+{%- if user.are_follows_private() and (not current_user.is_authenticated or not (current_user.get_id() == user.get_id() or current_user.has_admin_rights())) %}
+<p>{{ lang.tr('profile.followsprivate') }}</p>
+{%- else %}
+<div class="clearfix">
+<a href="{{ url_for('route_profile', username = user.get_user_name()) }}"><h1 class="float-left">{{ user.get_display_name() }}</h1></a>
+<h4 class="text-muted float-md-right">~{{ user.get_user_name() }}</h4>
+</div>
+<h3>{{ lang.tr('profile.followsheader') }}</h3>
+<br />
+<div class="list-group {{ (not msgs) and 'list-group-flush' or '' }}">
+{%- if prev_page %}
+<li class="list-group-item list-group-item-secondary"><a href="{{ url_for('route_profile_follows', username = user.get_user_name()) + '?b={}'.format(prev_page) }}"><span class="fa fa-chevron-left" aria-hidden="true"></span> {{ lang.tr('feed.prevpage') }}</a></li>
+{%- elif has_before %}
+<li class="list-group-item list-group-item-secondary"><a href="{{ url_for('route_profile_follows', username = user.get_user_name()) }}"><span class="fa fa-refresh" aria-hidden="true"></span> {{ lang.tr('feed.viewnewest') }}</a></li>
+{%- endif %}
+{% for user in users %}
+{{ render_user(user["user"]) | safe }}
+{% endfor %}
+{%- if next_page %}
+<li class="list-group-item list-group-item-secondary"><a href="{{ url_for('route_profile_follows', username = user.get_user_name()) + '?a={}'.format(next_page) }}">{{ lang.tr('feed.nextpage') }} <span class="fa fa-chevron-right" aria-hidden="true"></span></a></li>
+{%- endif %}
+</div>
+{%- endif %}
+{% endblock %}
