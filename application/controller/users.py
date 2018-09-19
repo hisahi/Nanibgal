@@ -13,7 +13,7 @@ def toggle_follow(user, other_user):
         return 400
     if other_user.are_messages_private() or other_user.is_banned():
         return 403
-    current_user.toggle_follow(other_user)
+    user.toggle_follow(other_user)
     return 200
 
 def toggle_ban(other_user):
