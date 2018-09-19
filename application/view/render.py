@@ -47,6 +47,14 @@ def render_user(lang, user):
     return render_template("user.html", lang = lang, 
                                         user = user)
 
+def render_user_report(lang, report):
+    return render_template("viewreportuser.html", lang = lang, 
+                                        report = report)
+
+def render_message_report(lang, report):
+    return render_template("viewreportmsg.html", lang = lang, 
+                                        report = report)
+
 # add links to ~username and #tag
 user_links = re.compile(r"~([A-Za-z_][0-9A-Za-z_]*)")
 tag_links = re.compile(r"(#[^\s#]+)")

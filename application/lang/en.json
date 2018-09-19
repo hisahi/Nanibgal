@@ -5,6 +5,7 @@
     "top.search": "Search",
     "top.new": "Post",
     "top.settings": "Settings",
+    "top.admin": "Admin",
     "top.login": "Log in",
     "top.logout": "Log out",
 
@@ -15,6 +16,11 @@
     "login.login": "Log in",
     "login.register_intro": "If you do not already have an account, you can register an account for free.",
     "login.invalid": "The login details were incorrect. Please check your caps setting and try again.",
+
+    "error.notfound.title": "404 - Not Found",
+    "error.notfound.text": "The content you tried to look for cannot be found. If you tried to find an user page, the user name may have changed. If you tried to look for a message, the message may have been deleted.",
+    "error.forbidden.title": "403 - Forbidden",
+    "error.forbidden.text": "You are not allowed to view this content.",
 
     "register.title": "Register",
     "register.username": "User name",
@@ -80,6 +86,9 @@
     "message.deletemodal.cancel": "Cancel",
 
     "viewmessage.title": "Message by ~%u",
+    "viewmessage.replytitle": "Replies to a message by ~%u",
+    "viewmessage.showreplies": "Show all replies",
+    "viewmessage.noreplies": "This message has no replies.",
 
     "newpost.title": "New message",
     "newpost.link": "Link",
@@ -126,6 +135,20 @@
     "banned.title": "Banned",
     "banned.heading": "Your account has been banned",
     "banned.text": "Contact the administrators or server owner for more information.",
+
+    "admin.title": "Admin control panel",
+    "admin.notadmin.title": "Forbidden",
+    "admin.notadmin.text": "You cannot view this content, as you are not an administrator.",
+    "admin.userreports": "See reports made of users",
+    "admin.userreports.title": "Reports made of users",
+    "admin.msgreports": "See reports made of messages",
+    "admin.msgreports.title": "Reports made of messages",
+    "admin.deletereport": "Mark this report as handled and delete it",
+    "admin.reportedbyuser": "Report made by user: %s",
+    "admin.reportedreason": "Report reason: %s",
+    "admin.reporteduser": "User reported: %s",
+    "admin.reportedmessage": "Owner of the message reported: %s",
+    "admin.noreports": "No reports",
 
     "settings.title": "Settings",
     "settings.success": "The settings have been saved successfully.",

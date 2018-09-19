@@ -1,0 +1,7 @@
+<div class="list-group-item flex-column align-items-start" data-report-id="{{ report['id'] }}">
+    <p>{{ escape_html(lang.tr('admin.reportedbyuser')).replace('%s', '<a href="' + url_for('route_profile', username = report['author_username']) + '">' + escape_html(report['author_name']) + '</a> (~' + escape_html(report['author_username']) + ')') | safe }}</p>
+    <p>{{ lang.tr('admin.reportedreason').replace('%s', lang.tr(report['reason'])) }}</p>
+    <p>{{ escape_html(lang.tr('admin.reporteduser')).replace('%s', '<a href="' + url_for('route_profile', username = report['target_username']) + '">' + escape_html(report['target_name']) + '</a> (~' + escape_html(report['target_username']) + ')') | safe }}</p>
+    <form class="inline" action="{{ url_for('route_remove_user_report') }}" method="POST"><input type="hidden" name="rid" value="{{ report['id'] }}" /><input type="hidden" name="next" value="{{ request.path + prefix_nonempty('?', request.query_string.decode('utf-8', 'ignore')) }}" />
+    <span class="fa fa-remove" aria-hidden="true"></span> <a href="javascript:void(0)" onclick="this.parentNode.submit()">{{ lang.tr('admin.deletereport') }}</a></form>
+</div>

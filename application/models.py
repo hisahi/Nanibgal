@@ -415,10 +415,33 @@ class Message(db.Model):
     def get_total_replies(self):
         return Message.query.filter_by(reply = self.msgid).count()
 
+    def get_message_replies(self, current_user, limit, before, after):
+        rev = before != None
+        stmt = text(("SELECT m.*, u.userid, u.username, u.displayname, "
+                   + "COUNT(CASE WHEN likes.user = :userid THEN likes.user "
+                   + "ELSE NULL END), COUNT(likes.user), COUNT(r.msgid) "
+                   + "FROM msgs m JOIN users u ON (u.userid = m.author) "
+                   + "LEFT JOIN likes ON likes.msg = m.msgid LEFT JOIN "
+                   + "msgs r ON r.reply = m.msgid WHERE m.reply = :msgid AND "
+                   + "(u.userid = :userid OR (u.banned = false AND "
+                   + "u.msgsareprivate = false)) {} GROUP BY m.msgid, u.userid "
+                   + "ORDER BY m.postdate " + ("ASC" if rev else "DESC") 
+                   + " LIMIT :limit"
+                   ).format("AND m.msgid >= :before" if before != None else 
+                           ("AND m.msgid <= :after" if after != None else ""))
+                   ).params(msgid = self.msgid, userid = current_user.get_id(), limit = limit, before = before, after = after)
+        res = db.engine.execute(stmt)
+        msgs = []
+        for row in res:
+            msgs.append({"id": row[0], "msg": Message.reconstruct(row[:8]), "user": {"userid": row[8], "username": row[9], "displayname": row[10]}, "has_liked": row[11] > 0, "likes": row[12], "replies": row[13]})
+        if rev:
+            msgs = msgs[::-1]
+        return msgs
+
 class ReportUser(db.Model):
     __tablename__ = "userreports"
     reportid = Column(Integer, primary_key = True)
-    reported_by = Column(Integer, ForeignKey("users.userid", ondelete = "SET NULL"))
+    reported_by = Column(Integer, ForeignKey("users.userid", ondelete = "CASCADE"))
     user_reported = Column(Integer, ForeignKey("users.userid", ondelete = "CASCADE"), nullable = False)
     reason = Column(String(128), nullable = False)
     reportdate = Column(DateTime, nullable = False, default = func.current_timestamp())
@@ -439,10 +462,33 @@ class ReportUser(db.Model):
     def update(self):
         db.session.commit()
 
+    @staticmethod
+    def get_reports(current_user, limit, before, after):
+        if not current_user.is_authenticated or not current_user.has_admin_rights():
+            return []
+        rev = before != None
+        stmt = text(("SELECT r.reportid, r.reason, a.username, a.displayname, "
+                   + "u.username, u.displayname FROM userreports r JOIN "
+                   + "users a ON a.userid = r.reported_by JOIN users u ON "
+                   + "u.userid = r.user_reported GROUP BY r.reportid, "
+                   + "a.userid, u.userid "
+                   + "ORDER BY r.reportdate " + ("ASC" if rev else "DESC") 
+                   + " LIMIT :limit"
+                   ).format("AND r.reportid >= :before" if before != None else 
+                           ("AND r.reportid <= :after" if after != None else ""))
+                   ).params(limit = limit, before = before, after = after)
+        res = db.engine.execute(stmt)
+        reports = []
+        for row in res:
+            reports.append({"id": row[0], "reason": row[1], "author_username": row[2], "author_name": row[3], "target_username": row[4], "target_name": row[5]})
+        if rev:
+            reports = reports[::-1]
+        return reports
+
 class ReportMessage(db.Model):
     __tablename__ = "msgreports"
     reportid = Column(Integer, primary_key = True)
-    reported_by = Column(Integer, ForeignKey("users.userid", ondelete = "SET NULL"))
+    reported_by = Column(Integer, ForeignKey("users.userid", ondelete = "CASCADE"))
     msg_reported = Column(Integer, ForeignKey("msgs.msgid", ondelete = "CASCADE"), nullable = False)
     reason = Column(String(128), nullable = False)
     reportdate = Column(DateTime, nullable = False, default = func.current_timestamp())
@@ -462,6 +508,30 @@ class ReportMessage(db.Model):
 
     def update(self):
         db.session.commit()
+
+    @staticmethod
+    def get_reports(current_user, limit, before, after):
+        if not current_user.is_authenticated or not current_user.has_admin_rights():
+            return []
+        rev = before != None
+        stmt = text(("SELECT r.reportid, r.reason, a.username, a.displayname, "
+                   + "u.username, u.displayname, m.msgid, m.contents FROM "
+                   + "msgreports r JOIN users a ON a.userid = r.reported_by " 
+                   + "JOIN msgs m ON m.msgid = r.msg_reported JOIN users u ON "
+                   + "u.userid = m.author GROUP BY r.reportid, "
+                   + "a.userid, u.userid, m.msgid "
+                   + "ORDER BY r.reportdate " + ("ASC" if rev else "DESC") 
+                   + " LIMIT :limit"
+                   ).format("AND r.reportid >= :before" if before != None else 
+                           ("AND r.reportid <= :after" if after != None else ""))
+                   ).params(limit = limit, before = before, after = after)
+        res = db.engine.execute(stmt)
+        reports = []
+        for row in res:
+            reports.append({"id": row[0], "reason": row[1], "author_username": row[2], "author_name": row[3], "target_username": row[4], "target_name": row[5], "msg_id": row[6], "msg_text": row[7]})
+        if rev:
+            reports = reports[::-1]
+        return reports
 
 class Notification(db.Model):
     __tablename__ = "notifications"

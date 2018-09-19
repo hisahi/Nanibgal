@@ -54,7 +54,7 @@ CREATE TABLE userreports (
         reason VARCHAR(128) NOT NULL,
         reportdate TIMESTAMP WITHOUT TIME ZONE NOT NULL,
         PRIMARY KEY (reportid),
-        FOREIGN KEY(reported_by) REFERENCES users (userid) ON DELETE SET NULL,
+        FOREIGN KEY(reported_by) REFERENCES users (userid) ON DELETE CASCADE,
         FOREIGN KEY(user_reported) REFERENCES users (userid) ON DELETE CASCADE
 );
 
@@ -79,7 +79,7 @@ CREATE TABLE msgreports (
         reason VARCHAR(128) NOT NULL,
         reportdate TIMESTAMP WITHOUT TIME ZONE NOT NULL,
         PRIMARY KEY (reportid),
-        FOREIGN KEY(reported_by) REFERENCES users (userid) ON DELETE SET NULL,
+        FOREIGN KEY(reported_by) REFERENCES users (userid) ON DELETE CASCADE,
         FOREIGN KEY(msg_reported) REFERENCES msgs (msgid) ON DELETE CASCADE
 );
 

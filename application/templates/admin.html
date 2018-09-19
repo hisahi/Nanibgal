@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}{{ lang.tr('admin.title') }} - Nanibgal{% endblock %}
+
+{% block body %}
+<h1>{{ lang.tr('admin.title') }}</h1>
+<ul>
+    <li>
+        <a href="{{ url_for('route_admin_userreports') }}">{{ lang.tr('admin.userreports') }}</a>
+    </li>
+    <li>
+        <a href="{{ url_for('route_admin_msgreports') }}">{{ lang.tr('admin.msgreports') }}</a>
+    </li>
+</ul>
+{% endblock %}

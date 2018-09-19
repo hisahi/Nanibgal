@@ -23,6 +23,11 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('route_profile', username = current_user.get_user_name()) }}">~{{ current_user.get_user_name() }}</a>
                     </li>
+                    {% if current_user.has_admin_rights() %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('route_admin') }}">{{ lang.tr("top.admin") }}</a>
+                    </li>
+                    {% endif %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('route_feed') }}">{{ lang.tr("top.feed") }}</a>
                     </li>

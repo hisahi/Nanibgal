@@ -10,3 +10,6 @@ def get_feed_from_user(user, limit = MSGS_PER_PAGE, before = None, after = None)
 
 def get_liked_messages(user, current_user, limit = MSGS_PER_PAGE, before = None, after = None):
     return user.get_liked_messages(current_user, limit, before, after)
+
+def get_message_replies(msg, current_user, limit = MSGS_PER_PAGE, before = None, after = None):
+    return msg.get_message_replies(current_user, limit, before, after)

@@ -5,6 +5,7 @@
     "top.search": "Haku",
     "top.new": "Kirjoita",
     "top.settings": "Asetukset",
+    "top.admin": "Valvoja",
     "top.login": "Kirjaudu",
     "top.logout": "Kirjaudu ulos",
 
@@ -15,6 +16,11 @@
     "login.login": "Kirjaudu",
     "login.register_intro": "Jos sinulla ei ole vielä tiliä, voit luoda sellaisen ilmaiseksi.",
     "login.invalid": "Kirjautumistiedot eivät täsmänneet. Tarkista Caps Lock -tilasi ja yritä uudelleen.",
+
+    "error.notfound.title": "404 - Ei löytynyt",
+    "error.notfound.text": "Hakemaasi sisältöä ei löytynyt. Jos hait käyttäjäsivua, käyttäjänimi on saattanut muuttua, kun taas viestin tapauksessa viesti on mahdollisesti poistettu.",
+    "error.forbidden.title": "403 - Kielletty",
+    "error.forbidden.text": "Sinulla ei ole lupaa nähdä hakemaasi sisältöä.",
 
     "register.title": "Luo tili",
     "register.username": "Käyttäjänim",
@@ -80,6 +86,9 @@
     "message.deletemodal.cancel": "Peruuta",
 
     "viewmessage.title": "Viesti käyttäjältä ~%u",
+    "viewmessage.replytitle": "Vastaukset viestiin käyttäjältä ~%u",
+    "viewmessage.showreplies": "Näytä kaikki vastaukset",
+    "viewmessage.noreplies": "Tällä viestillä ei ole vastauksia.",
 
     "newpost.title": "Kirjoita viesti",
     "newpost.link": "Linkki",
@@ -124,6 +133,20 @@
     "banned.title": "Porttikielto",
     "banned.heading": "Tilisi on saanut porttikiellon",
     "banned.text": "Ota yhteyttä valvojiin tai palvelimen omistajaan saadaksesi lisätietoja.",
+
+    "admin.title": "Valvojan hallintapaneeli",
+    "admin.notadmin.title": "Kielletty",
+    "admin.notadmin.text": "Et voi nähdä tätä sisältöä, koska et ole valvoja.",
+    "admin.userreports": "Katso käyttäjistä tehdyt ilmiannot",
+    "admin.userreports.title": "Käyttäjistä tehdyt ilmiannot",
+    "admin.msgreports": "Katso viesteistä tehdyt ilmiannot",
+    "admin.msgreports.title": "Viesteistä tehdyt ilmiannot",
+    "admin.deletereport": "Merkitse tämä ilmianto käsitellyksi ja poista se",
+    "admin.reportedbyuser": "Ilmiantanut käyttäjä: %s",
+    "admin.reportedreason": "Ilmiannon syy: %s",
+    "admin.reporteduser": "Ilmiannettu käyttäjä: %s",
+    "admin.reportedmessage": "Ilmiannetun viestin lähettäjä: %s",
+    "admin.noreports": "Ei ilmiantoja",
 
     "settings.title": "Asetukset",
     "settings.success": "Asetukset tallennettu onnistuneesti.",

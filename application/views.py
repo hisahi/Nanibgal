@@ -8,9 +8,10 @@ from application.misc import *
 from flask import render_template, request, redirect, url_for, abort
 from flask_login import current_user, login_required, login_user, logout_user, fresh_login_required
 from application.i18n import Language
+from application.view.admin import get_message_reports, get_user_reports
 from application.view.feed import compute_pages
-from application.view.msg import get_user_messages, get_feed_from_user, get_liked_messages
-from application.view.render import render_message, render_user, format_links
+from application.view.msg import get_user_messages, get_feed_from_user, get_liked_messages, get_message_replies
+from application.view.render import render_message, render_user, render_message_report, render_user_report, format_links
 from application.view.form import DeleteAccountForm, EditPostForm, LoginForm, RegisterForm, ReportPostForm, ReportUserForm, NewPostForm, SettingsForm
 from application.view.user import get_followed_users, get_followers
 from application.controller.auth import login, register
@@ -42,6 +43,16 @@ def get_user_lang(headers, current_user):
     if lang not in application.config.LANGUAGES:
         lang = "en"
     return lang
+
+@app.errorhandler(403)
+def page_not_found(e):
+    lang = Language(get_user_lang(request.headers, current_user))
+    return render_template("403.html", lang = lang), 403
+
+@app.errorhandler(404)
+def page_not_found(e):
+    lang = Language(get_user_lang(request.headers, current_user))
+    return render_template("404.html", lang = lang), 404
 
 @app.route("/")
 def route_feed(): # 𒀭𒀭𒊺𒉀
@@ -139,7 +150,28 @@ def route_message(username, postid):
         reply = get_message_by_id(msg.reply)
     return render_template("viewmessage.html", lang = lang, user = user, msg = msg, 
                             reply = reply, reply_id = msg.reply, is_reply = msg.is_reply, 
-                            render_message = bind1(render_message, lang))
+                            render_message = bind1(render_message, lang),
+                            username = username, postid = postid)
+
+@app.route("/~<username>/<int:postid>/replies")
+def route_profile_replies(username, postid):
+    lang = Language(get_user_lang(request.headers, current_user))
+    if current_user.is_authenticated and current_user.is_banned():
+        return render_template("banned.html", lang = lang)
+    user = get_user_by_name(username)
+    if user == None:
+        return abort(404)
+    if user.is_banned() and (not current_user.is_authenticated or not current_user.has_admin_rights()):
+        return redirect(url_for("route_profile", username = username))
+    msg = get_message_by_id(postid)
+    if msg == None:
+        return abort(404)
+    msgs, next_page, prev_page = compute_pages(request.args, get_message_replies, msg, current_user)
+    return render_template("viewreplies.html", lang = lang, user = user, msgs = msgs, 
+                            render_message = bind1(render_message, lang), 
+                            prev_page = prev_page, next_page = next_page,
+                            has_before = "b" in request.args or "a" in request.args,
+                            username = username, postid = postid)
 
 @app.route("/login", methods = ["GET", "POST"])
 def route_login():
@@ -404,6 +436,62 @@ def route_report_msg():
     except:
         return abort(400)
     return render_template("reportmsg.html", lang = lang, form = nform, msg_id = msg_id, error = None)
+
+@app.route("/admin")
+@login_required
+def route_admin():
+    lang = Language(get_user_lang(request.headers, current_user))
+    if not current_user.has_admin_rights() or current_user.is_banned():
+        return render_template("notadmin.html", lang = lang)
+    return render_template("admin.html", lang = lang)
+
+@app.route("/admin/reports/user")
+@login_required
+def route_admin_userreports():
+    lang = Language(get_user_lang(request.headers, current_user))
+    if not current_user.has_admin_rights() or current_user.is_banned():
+        return render_template("notadmin.html", lang = lang)
+    reports, next_page, prev_page = compute_pages(request.args, get_user_reports, current_user)
+    return render_template("admin_userreports.html", lang = lang, reports = reports, 
+                            render_report = bind1(render_user_report, lang), 
+                            prev_page = prev_page, next_page = next_page,
+                            has_before = "b" in request.args or "a" in request.args)
+
+@app.route("/admin/reports/msg")
+@login_required
+def route_admin_msgreports():
+    lang = Language(get_user_lang(request.headers, current_user))
+    if not current_user.has_admin_rights() or current_user.is_banned():
+        return render_template("notadmin.html", lang = lang)
+    reports, next_page, prev_page = compute_pages(request.args, get_message_reports, current_user)
+    return render_template("admin_msgreports.html", lang = lang, reports = reports, 
+                            render_report = bind1(render_message_report, lang), 
+                            prev_page = prev_page, next_page = next_page,
+                            has_before = "b" in request.args or "a" in request.args)
+
+@app.route("/admin/reports/user/delete", methods = ["POST"])
+@login_required
+def route_remove_user_report():
+    if not current_user.has_admin_rights() or current_user.is_banned():
+        return abort(403)
+    rid = request.form["rid"]
+    try:
+        application.models.ReportUser.query.filter_by(reportid = rid).first().terminate()
+    except:
+        return abort(400)
+    return redirect(get_safe_url(request.host_url, request.form["next"] or url_for("route_admin_userreports"), url_for("route_admin_userreports")))
+
+@app.route("/admin/reports/msg/delete", methods = ["POST"])
+@login_required
+def route_remove_msg_report():
+    if not current_user.has_admin_rights() or current_user.is_banned():
+        return abort(403)
+    rid = request.form["rid"]
+    try:
+        application.models.ReportMessage.query.filter_by(reportid = rid).first().terminate()
+    except:
+        return abort(400)
+    return redirect(get_safe_url(request.host_url, request.form["next"] or url_for("route_admin_msgreports"), url_for("route_admin_msgreports")))
 
 @app.route("/logout")
 @login_required
