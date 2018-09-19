@@ -31,7 +31,7 @@ def handle_settings(id, request):
     user.set_messages_private("privatemessages" in request)
     user.set_likes_private("privatelikes" in request)
     if request["username"]:
-        fmt = request["displayname"].strip()[:20]
+        fmt = request["username"].strip()[:20]
         if not validate_username(fmt):
             return "settings.error.invalid_username"
         if user.username != fmt:

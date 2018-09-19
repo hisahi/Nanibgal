@@ -383,6 +383,8 @@ def route_msg_delete():
 @app.route("/delete_account", methods = ["POST"])
 @fresh_login_required
 def route_delete_account():
+    if current_user.is_banned():
+        return abort(403)
     lform = DeleteAccountForm(request.form)
     if lform.validate():
         if not handle_delete_account(current_user.get_id(), request.form):
