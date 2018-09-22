@@ -1,6 +1,7 @@
 
 from urllib.parse import urlparse, urljoin
 import application.config
+import re
 
 # http://flask.pocoo.org/snippets/62/
 def is_safe_url(host_url, target):
@@ -57,6 +58,11 @@ def generate_user_report_reason_list(lang):
 # generates a list of message report reasons
 def generate_msg_report_reason_list(lang):
     return generate_list_from(lang, application.config.MSG_REPORT_REASONS, "reportmsg.reason.")
+
+user_links = re.compile(r"\B~([A-Za-z_][0-9A-Za-z_]*)")
+tag_links = re.compile(r"\B(#[^\s#]+)")
+def get_mentions(message):
+    return [x for x in re.findall(user_links, message)]
 
 # takes a dict, converts it to a format accepted by the FlaskForm constructor as obj
 class populate_dict():

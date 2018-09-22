@@ -1,0 +1,5 @@
+<div class="list-group-item flex-column align-items-start" data-notification-id="{{ notification.notifid }}">
+    <h2><span class="fa fa-heart" aria-hidden="true"></span> {{ lang.tr("notifications.newlike") }}</h2>
+    <a href="{{ url_for('route_profile', username = notification.otheruser.get_user_name()) }}">{{ notification.otheruser.get_display_name() }}</a> <small class="text-muted">~{{ notification.otheruser.get_user_name() }}</small>
+    <a href="{{ url_for('route_message', username = current_user.get_user_name(), postid = notification.message.get_id()) }}"><p class="font-italic">{{ notification.message.get_text() }}</p></a>
+</div>

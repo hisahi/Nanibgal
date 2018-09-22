@@ -11,7 +11,7 @@ from application.i18n import Language
 from application.view.admin import get_message_reports, get_user_reports
 from application.view.feed import compute_pages
 from application.view.msg import get_user_messages, get_feed_from_user, get_liked_messages, get_message_replies
-from application.view.render import render_message, render_user, render_message_report, render_user_report, format_links
+from application.view.render import render_message, render_user, render_message_report, render_user_report, render_notification, format_links
 from application.view.form import DeleteAccountForm, EditPostForm, LoginForm, RegisterForm, ReportPostForm, ReportUserForm, NewPostForm, SettingsForm
 from application.view.user import get_followed_users, get_followers
 from application.controller.auth import login, register
@@ -227,6 +227,16 @@ def route_search():
         return render_template("banned.html", lang = lang)
     return render_template("search.html", lang = lang)
 
+@app.route("/notifications")
+@login_required
+def route_notifications():
+    lang = Language(get_user_lang(request.headers, current_user))
+    if current_user.is_authenticated and current_user.is_banned():
+        return render_template("banned.html", lang = lang)
+    return render_template("notifications.html", lang = lang, 
+                            notifs = current_user.get_notifications(False), 
+                            render_notification = bind1(render_notification, lang))
+
 @app.route("/new", methods = ["GET", "POST"])
 @login_required
 def route_new():
@@ -390,6 +400,15 @@ def route_delete_account():
         if not handle_delete_account(current_user.get_id(), request.form):
             return redirect(url_for("route_feed"))
     return redirect(url_for("route_settings"))
+
+@app.route("/notifications/read", methods = ["POST"])
+@fresh_login_required
+def route_notifications_read():
+    if current_user.is_banned():
+        return abort(403)
+    nid = request.form["nid"]
+    current_user.set_notifications_read_up_to(nid)
+    return redirect(url_for("route_notifications"))
 
 @app.route("/reportuser", methods = ["GET", "POST"])
 @login_required

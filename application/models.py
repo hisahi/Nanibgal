@@ -1,6 +1,7 @@
 
-from application import db
 import application.config
+from application import db
+from application.misc import get_mentions
 
 from sqlalchemy import *
 from sqlalchemy.orm import relationship
@@ -298,6 +299,7 @@ class User(db.Model):
             db.session.execute(table_Follows.insert().values(
                                 follower = self.userid,
                                 followed = user.userid))
+            user.notify_of_follow(self) # notification
             db.session.commit()
 
     def toggle_ban(self):
@@ -322,6 +324,60 @@ class User(db.Model):
                                 user = self.userid,
                                 msg = msg.msgid))
             db.session.commit()
+            msg._author.notify_of_like(self, msg) # notification
+
+    def get_notification_count(self):
+        return Notification.query.filter_by(userid = self.userid, unread = True).count()
+
+    def get_notifications(self, set_as_read):
+        result = []
+        for notif in Notification.query.filter_by(userid = self.userid, unread = True).order_by(Notification.notifid.desc()).all():
+            result.append(notif)
+        if set_as_read:
+            for notif in result:
+                notif.read()
+        return result
+
+    def set_notifications_read_up_to(self, max_id):
+        db.engine.execute(text("UPDATE " + Notification.__tablename__ + " SET unread = FALSE WHERE notifid <= :notifid AND userid = :userid").params(userid = self.userid, notifid = max_id))
+
+    def notify_of_follow(self, followed_by):
+        if self.is_banned(): # no notifications for banned users
+            return
+        Notification.clean_up_old()
+        # if already notified with this user, block to avoid spam
+        if Notification.query.filter_by(userid = self.userid, otheruserid = followed_by.userid).first():
+            return
+        notif = Notification.follow_notification(self, followed_by)
+        if notif:
+            notif.add_itself()
+
+    def notify_of_like(self, like_by, liked_msg):
+        if self.is_banned(): # no notifications for banned users
+            return
+        Notification.clean_up_old()
+        # if already notified with this user and message, block to avoid spam
+        if Notification.query.filter_by(userid = self.userid, otheruserid = like_by.userid, messageid = liked_msg.msgid).first():
+            return
+        notif = Notification.like_notification(self, like_by, liked_msg)
+        if notif:
+            notif.add_itself()
+
+    def notify_of_reply(self, reply_by, reply_msg):
+        if self.is_banned(): # no notifications for banned users
+            return
+        Notification.clean_up_old()
+        notif = Notification.reply_notification(self, reply_by, reply_msg)
+        if notif:
+            notif.add_itself()
+
+    def notify_of_mention(self, mention_by, message):
+        if self.is_banned(): # no notifications for banned users
+            return
+        Notification.clean_up_old()
+        notif = Notification.mention_notification(self, mention_by, message)
+        if notif:
+            notif.add_itself()
 
 class Message(db.Model):
     __tablename__ = "msgs"
@@ -333,6 +389,9 @@ class Message(db.Model):
     editdate = Column(DateTime)
     is_reply = Column(Boolean, default = False)
     reply = Column(Integer, ForeignKey("msgs.msgid", ondelete = "SET NULL"))
+
+    _author = relationship("User", foreign_keys = [author])
+    _reply = relationship("Message", foreign_keys = [reply], lazy = "dynamic")
 
     def __init__(self, author, text, link = None, reply = None):
         if type(author) == User:
@@ -362,6 +421,12 @@ class Message(db.Model):
         self.is_reply = (self.reply != None)
         db.session.add(self)
         db.session.commit()
+        if self.is_reply: # reply notification
+            Message.query.filter_by(msgid = self.reply).first()._author.notify_of_reply(self._author, self)
+        for username in get_mentions(self.contents): # mention notification
+            u = User.query.filter_by(username = username).first()
+            if u:
+                u.notify_of_mention(self._author, self)
 
     def terminate(self):
         db.session.delete(self)
@@ -536,13 +601,17 @@ class ReportMessage(db.Model):
 class Notification(db.Model):
     __tablename__ = "notifications"
     notifid = Column(Integer, primary_key = True)
-    kind = Column(Integer, primary_key = True)
+    kind = Column(Integer, nullable = False)
         # 0 = new follower, 1 = message liked, 2 = reply to message, 3 = new mention
     userid = Column(Integer, ForeignKey("users.userid", ondelete = "CASCADE"), nullable = False)
     otheruserid = Column(Integer, ForeignKey("users.userid", ondelete = "CASCADE"))
     messageid = Column(Integer, ForeignKey("msgs.msgid", ondelete = "CASCADE"))
     notificationdate = Column(DateTime, nullable = False, default = func.current_timestamp())
     unread = Column(Boolean, nullable = False, default = True)
+
+    user = relationship("User", foreign_keys = [userid])
+    otheruser = relationship("User", foreign_keys = [otheruserid])
+    message = relationship("Message", foreign_keys = [messageid])
 
     # not to be used directly: use one of the four class methods instead
     def __init__(self, kind, userid, otheruserid = None, messageid = None):
@@ -554,27 +623,31 @@ class Notification(db.Model):
 
     @classmethod
     def follow_notification(cls, user, follower):
-        if user.is_banned():
+        if user.is_banned() or user.get_id() == follower.get_id():
             return None
-        return cls(0, user.get_id(), follower)
+        return cls(0, user.get_id(), follower.get_id())
 
     @classmethod
     def like_notification(cls, user, liked_by, liked_msg):
-        if user.is_banned():
+        if user.is_banned() or user.get_id() == liked_by.get_id():
             return None
-        return cls(1, user.get_id(), liked_by, liked_msg)
+        return cls(1, user.get_id(), liked_by.get_id(), liked_msg.get_id())
 
     @classmethod
     def reply_notification(cls, user, reply_by, reply_to_msg):
-        if user.is_banned():
+        if user.is_banned() or user.get_id() == reply_by.get_id():
             return None
-        return cls(2, user.get_id(), reply_by, reply_to_msg)
+        return cls(2, user.get_id(), reply_by.get_id(), reply_to_msg.get_id())
 
     @classmethod
     def mention_notification(cls, user, mention_by, mention_in_msg):
-        if user.is_banned():
+        if user.is_banned() or user.get_id() == mention_by.get_id():
             return None
-        return cls(3, user.get_id(), mention_by, mention_in_msg)
+        return cls(3, user.get_id(), mention_by.get_id(), mention_in_msg.get_id())
+
+    @staticmethod
+    def clean_up_old():
+        db.engine.execute(text("DELETE FROM " + Notification.__tablename__ + " WHERE notificationdate < now() - interval '{} hours'".format(int(application.config.NOTIFICATIONS_MAX_AGE))))
 
     def add_itself(self):
         db.session.add(self)
@@ -591,8 +664,9 @@ class Notification(db.Model):
         self.read = True
         self.update()
 
+db.Index("idx_user_from_id", User.userid, unique = True)
+db.Index("idx_msg_from_id", Message.msgid, unique = True)
 db.Index("idx_msgs_from_user", Message.author)
-db.Index("idx_user_from_id", User.userid)
 db.Index("idx_followeds_from_user", table_Follows.c.follower)
 db.Index("idx_likes_from_msg", table_Likes.c.msg)
 db.Index("idx_notifs_from_user", Notification.userid)

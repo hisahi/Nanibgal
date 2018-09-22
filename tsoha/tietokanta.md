@@ -84,7 +84,7 @@ CREATE TABLE msgreports (
 );
 
 CREATE TABLE notifications (
-        notifid INTEGER NOT NULL,
+        notifid SERIAL NOT NULL,
         kind INTEGER NOT NULL,
         userid INTEGER NOT NULL,
         otheruserid INTEGER,
@@ -97,7 +97,8 @@ CREATE TABLE notifications (
         FOREIGN KEY(messageid) REFERENCES msgs (msgid) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_user_from_id ON users (userid);
+CREATE UNIQUE INDEX idx_user_from_id ON users (userid);
+CREATE UNIQUE INDEX idx_msg_from_id ON msgs (msgid);
 CREATE INDEX idx_followeds_from_user ON follows (follower);
 CREATE INDEX idx_msgs_from_user ON msgs (author);
 CREATE INDEX idx_likes_from_msg ON likes (msg);

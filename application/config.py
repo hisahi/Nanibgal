@@ -25,3 +25,6 @@ if DEBUG:
 # while message report reason "test" is under "reportmsg.reason.test"
 USER_REPORT_REASONS = ["inappropriate", "impersonation", "spam"]
 MSG_REPORT_REASONS = ["inappropriate", "spam", "privacyviolation", "copyright"]
+
+# Maximum age ot notifications, read or unread, in hours.
+NOTIFICATIONS_MAX_AGE = 24 * 7

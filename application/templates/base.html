@@ -23,11 +23,16 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('route_profile', username = current_user.get_user_name()) }}">~{{ current_user.get_user_name() }}</a>
                     </li>
+                    {% if not current_user.is_banned() %}
                     {% if current_user.has_admin_rights() %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('route_admin') }}">{{ lang.tr("top.admin") }}</a>
                     </li>
                     {% endif %}
+                    <li class="nav-item">
+                        {% set notif_count = current_user.get_notification_count() %}
+                        <a class="nav-link {{ 'font-weight-bold' if notif_count else '' }}" href="{{ url_for('route_notifications') }}">{{ lang.tr("top.notifications").replace("%d", "{}".format(notif_count)) }}</a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('route_feed') }}">{{ lang.tr("top.feed") }}</a>
                     </li>
@@ -42,6 +47,7 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('route_settings') }}">{{ lang.tr("top.settings") }}</a>
                     </li>
+                    {% endif %}
                     {% endif %}
                 </ul>
                 {% if current_user.is_authenticated %}

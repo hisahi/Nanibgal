@@ -1,0 +1,4 @@
+<div class="list-group-item flex-column align-items-start" data-notification-id="{{ notification.notifid }}">
+    <h2><span class="fa fa-plus" aria-hidden="true"></span> {{ lang.tr("notifications.newfollower") }}</h2>
+    <a href="{{ url_for('route_profile', username = notification.otheruser.get_user_name()) }}">{{ notification.otheruser.get_display_name() }}</a> <small class="text-muted">~{{ notification.otheruser.get_user_name() }}</small>
+</div>

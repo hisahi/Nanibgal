@@ -3,6 +3,7 @@ import re, urllib.parse
 
 from flask import render_template, url_for
 from flask_login import current_user
+from application.misc import user_links, tag_links
 
 def render_message(lang, message, user = None, userid = None, username = None, 
                     displayname = None, is_private = None, is_banned = None,
@@ -55,9 +56,14 @@ def render_message_report(lang, report):
     return render_template("viewreportmsg.html", lang = lang, 
                                         report = report)
 
+def render_notification(lang, notification): # type(notification) = Notification
+    template = {0: "notification_follow.html",
+                1: "notification_like.html",
+                2: "notification_reply.html",
+                3: "notification_mention.html"}[notification.kind]
+    return render_template(template, lang = lang, notification = notification)
+
 # add links to ~username and #tag
-user_links = re.compile(r"~([A-Za-z_][0-9A-Za-z_]*)")
-tag_links = re.compile(r"(#[^\s#]+)")
 def format_links(text):
     text = user_links.sub(lambda x: "<a href=\"" + 
                                     url_for("route_profile", username = x.group(1)) + "\">~" + 

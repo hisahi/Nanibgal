@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}{{ lang.tr('notifications.title') }} - Nanibgal{% endblock %}
+
+{% block body %}
+<div class="clearfix">
+<h1>{{ lang.tr('notifications.title') }}</h1>
+{% if notifs %}
+<span class="float-md-right"><form class="inline" action="{{ url_for('route_notifications_read') }}" method="POST"><input type="hidden" name="nid" value="{{ notifs[0].notifid }}" />
+<span class="fa fa-check" aria-hidden="true"></span> <a href="javascript:void(0)" onclick="this.parentNode.submit()">{{ lang.tr('notifications.markread') }}</a></form></span>
+{% endif %}
+</div>
+<br />
+<div class="list-group {{ (not notifs) and 'list-group-flush' or '' }}">
+{% for notif in notifs %}
+{{ render_notification(notif) | safe }}
+{% endfor %}
+{% if not notifs %}
+<li class="list-group-item">{{ lang.tr('notifications.none') }}</li>
+{% endif %}
+</div>
+{% endblock %}

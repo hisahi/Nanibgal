@@ -13,7 +13,7 @@
 </div>
 <h3>{{ lang.tr('profile.followersheader') }}</h3>
 <br />
-<div class="list-group {{ (not msgs) and 'list-group-flush' or '' }}">
+<div class="list-group {{ (not users) and 'list-group-flush' or '' }}">
 {%- if prev_page %}
 <li class="list-group-item list-group-item-secondary"><a href="{{ url_for('route_profile_followers', username = user.get_user_name()) + '?b={}'.format(prev_page) }}"><span class="fa fa-chevron-left" aria-hidden="true"></span> {{ lang.tr('feed.prevpage') }}</a></li>
 {%- elif has_before %}

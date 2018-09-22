@@ -2,6 +2,7 @@
     "nanibgal": "Nanibgal",
 
     "top.feed": "Syöte",
+    "top.notifications": "Ilmoitukset (%d)",
     "top.search": "Haku",
     "top.new": "Kirjoita",
     "top.settings": "Asetukset",
@@ -66,6 +67,14 @@
     "feed.viewnewest": "näytä uusimmat",
 
     "user.notavailable": "Tämä käyttäjä ei ole saatavilla.",
+
+    "notifications.title": "Ilmoitukset",
+    "notifications.markread": "Merkitse luetuksi",
+    "notifications.newfollower": "Uusi seuraaja",
+    "notifications.newlike": "Käyttäjä tykkäsi viestistäsi",
+    "notifications.newreply": "Viestiisi vastattiin",
+    "notifications.newmention": "Joku mainitsi sinut viestissään",
+    "notifications.none": "Ei lukemattomia ilmoituksia",
 
     "message.reply": "Vastaa",
     "message.like": "Tykkää",
