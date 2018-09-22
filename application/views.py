@@ -145,6 +145,8 @@ def route_message(username, postid):
     msg = get_message_by_id(postid)
     if msg == None:
         return abort(404)
+    if user.get_id() != msg.get_author_id():
+        return abort(404)
     reply = None
     if msg.reply != None:
         reply = get_message_by_id(msg.reply)
