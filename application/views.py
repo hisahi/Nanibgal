@@ -10,10 +10,10 @@ from flask_login import current_user, login_required, login_user, logout_user, f
 from application.i18n import Language
 from application.view.admin import get_message_reports, get_user_reports
 from application.view.feed import compute_pages
-from application.view.msg import get_user_messages, get_feed_from_user, get_liked_messages, get_message_replies
+from application.view.msg import get_user_messages, get_feed_from_user, get_liked_messages, get_message_replies, search_for_messages
 from application.view.render import render_message, render_user, render_message_report, render_user_report, render_notification, format_links
-from application.view.form import DeleteAccountForm, EditPostForm, LoginForm, RegisterForm, ReportPostForm, ReportUserForm, NewPostForm, SettingsForm
-from application.view.user import get_followed_users, get_followers
+from application.view.form import DeleteAccountForm, EditPostForm, LoginForm, RegisterForm, ReportPostForm, ReportUserForm, NewPostForm, SettingsForm, SearchMessageForm, SearchUserForm
+from application.view.user import get_followed_users, get_followers, search_for_users
 from application.controller.auth import login, register
 from application.controller.messages import get_message_by_id, new_message, edit_message, toggle_like
 from application.controller.reports import handle_user_report, handle_message_report
@@ -27,11 +27,11 @@ app.jinja_env.globals.update(format_links = format_links)
 app.jinja_env.globals.update(escape_html = escape_html)
 app.jinja_env.globals.update(prefix_nonempty = prefix_nonempty)
 
-# http://flask.pocoo.org/snippets/128/
+# based on http://flask.pocoo.org/snippets/128/
 def get_preferred_anon_lang(headers):
     UA_langs = request.headers.get('Accept-Language').split(",")
     matches = filter(lambda x: x.split(";")[0] in application.config.LANGUAGES, UA_langs)
-    return next(matches) or "en"
+    return next(matches).split(";")[0] or "en"
 
 def get_user_lang(headers, current_user):
     if not current_user.is_authenticated:
@@ -153,7 +153,8 @@ def route_message(username, postid):
     return render_template("viewmessage.html", lang = lang, user = user, msg = msg, 
                             reply = reply, reply_id = msg.reply, is_reply = msg.is_reply, 
                             render_message = bind1(render_message, lang),
-                            username = username, postid = postid)
+                            username = username, postid = postid,
+                            important_replies = msg.get_most_important_message_replies(current_user))
 
 @app.route("/~<username>/<int:postid>/replies")
 def route_profile_replies(username, postid):
@@ -222,12 +223,33 @@ def route_register():
     return render_template("register.html", lang = lang, form = nform, oldform = oldform, 
                             error = error)
 
-@app.route("/search", methods = ["GET", "POST"])
+@app.route("/search")
 def route_search():
     lang = Language(get_user_lang(request.headers, current_user))
     if current_user.is_authenticated and current_user.is_banned():
         return render_template("banned.html", lang = lang)
-    return render_template("search.html", lang = lang)
+    if request.args.get("q", None):
+        q = request.args.get("q")[:512]
+        msgs, next_page, prev_page = compute_pages(request.args, search_for_messages, current_user, q)
+        return render_template("search_results.html", lang = lang, msgs = msgs, 
+                                render_message = bind1(render_message, lang), q = q, 
+                                prev_page = prev_page, next_page = next_page,
+                                has_before = "b" in request.args or "a" in request.args)
+    return render_template("search.html", lang = lang, form = SearchMessageForm(csrf_enabled = False).localized(lang))
+
+@app.route("/searchuser")
+def route_search_user():
+    lang = Language(get_user_lang(request.headers, current_user))
+    if current_user.is_authenticated and current_user.is_banned():
+        return render_template("banned.html", lang = lang)
+    if request.args.get("q", None):
+        q = request.args.get("q")[:512]
+        users, next_page, prev_page = compute_pages(request.args, search_for_users, current_user, q)
+        return render_template("searchuser_results.html", lang = lang, users = users, 
+                                render_user = bind1(render_user, lang), q = q,
+                                prev_page = prev_page, next_page = next_page,
+                                has_before = "b" in request.args or "a" in request.args)
+    return render_template("searchuser.html", lang = lang, form = SearchUserForm(csrf_enabled = False).localized(lang))
 
 @app.route("/notifications")
 @login_required

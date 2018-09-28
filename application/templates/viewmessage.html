@@ -13,6 +13,15 @@
 {{ render_message(msg, user, disable_message_link = True, pre_wrap = True) | safe }}
 </div>
 {%- if msg.get_total_replies() > 0 %}
+<br />
+<h2>{{ lang.tr('message.somereplies') }}</h2>
 <a href="{{ url_for('route_profile_replies', username = username, postid = postid) }}">{{ lang.tr('viewmessage.showreplies') }}</a>
+<br />
+<br />
+<div class="list-group">
+{%- for msg in important_replies %}
+{{ render_message(msg['msg'], userid = msg['user']['userid'], username = msg['user']['username'], displayname = msg['user']['displayname'], has_liked = msg['has_liked'], likes = msg['likes'], replies = msg['replies']) | safe }}
+{%- endfor %}
+</div>
 {%- endif %}
 {% endblock %}

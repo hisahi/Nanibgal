@@ -88,6 +88,7 @@
     "message.deleted": "The message is not available, as it has been deleted.",
     "message.is_reply": "The message below is a reply to the message above.",
     "message.reply_tooltip": "This message is a reply to another message",
+    "message.somereplies": "Replies to this message",
     "message.deletemodal.title": "Delete post",
     "message.deletemodal.text": "Are you sure you want to delete this post?",
     "message.deletemodal.notyourmsg": "Note: you did not post this message, but can delete it, as you are an administrator.",
@@ -117,6 +118,14 @@
     "editpost.error.toolate": "The message can only be edited within 10 minutes of its posting.",
 
     "search.title": "Search",
+    "search.titleuser": "User search",
+    "search.searchmsgs": "Search for messages",
+    "search.searchusers": "Search for users",
+    "search.searchothermsgs": "Back to message search",
+    "search.searchotherusers": "Back to user search",
+    "search.results": "Search results",
+    "search.noresults": "No results found",
+    "search.search": "Search",
 
     "reportuser.title": "Report user",
     "reportuser.success": "Thank you for the report.",

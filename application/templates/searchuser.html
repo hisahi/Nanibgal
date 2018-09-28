@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}{{ lang.tr('search.title') }} - Nanibgal{% endblock %}
+{% block title %}{{ lang.tr('search.titleuser') }} - Nanibgal{% endblock %}
 
 {% block body %}
-<h1>{{ lang.tr('search.searchmsgs') }}</h1>
-<a href="{{ url_for('route_search_user') }}">{{ lang.tr('search.searchusers') }}</a>
+<h1>{{ lang.tr('search.searchusers') }}</h1>
+<a href="{{ url_for('route_search') }}">{{ lang.tr('search.searchmsgs') }}</a>
 <br />
 <br />
-<form method="GET" action="{{ url_for('route_search') }}">
+<form method="GET" action="{{ url_for('route_search_user') }}">
     <div class="form-group row">
         <div class="col-sm-12">
             {{ form.q(class="form-control", required=True, minlength=1, maxlength=512, pattern=".{1,512}") }}

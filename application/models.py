@@ -1,7 +1,7 @@
 
 import application.config
 from application import db
-from application.misc import get_mentions
+from application.misc import get_mentions, sql_like_escape
 
 from sqlalchemy import *
 from sqlalchemy.orm import relationship
@@ -379,6 +379,29 @@ class User(db.Model):
         if notif:
             notif.add_itself()
 
+    @staticmethod
+    def search_users(current_user, search, limit, before, after):
+        rev = before != None
+        cons, keys, stok = "", {}, 0
+        for word in search[0]:
+            stok += 1
+            cons += " AND (lower(' ' || users.username || ' ') LIKE '% ' || :stok" + str(stok) + " || ' %' ESCAPE '\\'"
+            cons += " OR lower(' ' || users.displayname || ' ') LIKE '% ' || :stok" + str(stok) + " || ' %' ESCAPE '\\')"
+            keys["stok" + str(stok)] = sql_like_escape(word).lower()
+        stmt = text(("SELECT users.* FROM users WHERE users.banned = false "
+                   + "{} {} GROUP BY users.userid ORDER BY users.userid " 
+                   + ("ASC" if rev else "DESC") + " LIMIT :limit"
+                   ).format(cons, "AND users.userid >= :before" if before != None else 
+                           ("AND users.userid <= :after" if after != None else ""))
+                   ).params(userid = current_user.get_id(), limit = limit, before = before, after = after, **keys)
+        res = db.engine.execute(stmt)
+        users = []
+        for row in res:
+            users.append({"id": row[0], "user": User.reconstruct(row[:11])})
+        if rev:
+            users = users[::-1]
+        return users
+
 class Message(db.Model):
     __tablename__ = "msgs"
     msgid = Column(Integer, primary_key = True)
@@ -495,6 +518,55 @@ class Message(db.Model):
                    ).format("AND m.msgid >= :before" if before != None else 
                            ("AND m.msgid <= :after" if after != None else ""))
                    ).params(msgid = self.msgid, userid = current_user.get_id(), limit = limit, before = before, after = after)
+        res = db.engine.execute(stmt)
+        msgs = []
+        for row in res:
+            msgs.append({"id": row[0], "msg": Message.reconstruct(row[:8]), "user": {"userid": row[8], "username": row[9], "displayname": row[10]}, "has_liked": row[11] > 0, "likes": row[12], "replies": row[13]})
+        if rev:
+            msgs = msgs[::-1]
+        return msgs
+
+    def get_most_important_message_replies(self, current_user):
+        stmt = text(("SELECT m.*, u.userid, u.username, u.displayname, "
+                   + "COUNT(CASE WHEN likes.user = :userid THEN likes.user "
+                   + "ELSE NULL END), COUNT(likes.user), COUNT(r.msgid) "
+                   + "FROM msgs m JOIN users u ON (u.userid = m.author) "
+                   + "LEFT JOIN likes ON likes.msg = m.msgid LEFT JOIN "
+                   + "msgs r ON r.reply = m.msgid WHERE m.reply = :msgid AND "
+                   + "(u.userid = :userid OR (u.banned = false AND "
+                   + "u.msgsareprivate = false)) GROUP BY m.msgid, u.userid "
+                   + "ORDER BY COUNT(likes.user) DESC LIMIT :limit" 
+                   )).params(msgid = self.msgid, userid = current_user.get_id(), limit = 10)
+        res = db.engine.execute(stmt)
+        msgs = []
+        for row in res:
+            msgs.append({"id": row[0], "msg": Message.reconstruct(row[:8]), "user": {"userid": row[8], "username": row[9], "displayname": row[10]}, "has_liked": row[11] > 0, "likes": row[12], "replies": row[13]})
+        return msgs
+
+    @staticmethod
+    def search_messages(current_user, search, limit, before, after):
+        rev = before != None
+        cons, keys, stok = "", {}, 0
+        for word in search[0]:
+            stok += 1
+            cons += " AND lower(' ' || m.contents || ' ') LIKE '% ' || :stok" + str(stok) + " || ' %' ESCAPE '\\'"
+            keys["stok" + str(stok)] = sql_like_escape(word).lower()
+        if "by" in search[1]:
+            cons += " AND lower(u.username) = lower(:byusername)"
+            keys["byusername"] = search[1]["by"]
+        stmt = text(("SELECT m.*, u.userid, u.username, "
+                   + "u.displayname, COUNT(CASE WHEN likes.user = :userid THEN "
+                   + "likes.user ELSE NULL END), COUNT(likes.user), "
+                   + "COUNT(r.msgid) FROM msgs m JOIN users u ON "
+                   + "(u.userid = m.author) LEFT "
+                   + "JOIN likes ON likes.msg = m.msgid LEFT JOIN msgs r ON "
+                   + "r.reply = m.msgid WHERE (u.userid = :userid OR "
+                   + "(u.banned = false AND u.msgsareprivate = false)) {} {} "
+                   + "GROUP BY m.msgid, u.userid ORDER BY m.postdate "
+                   + ("ASC" if rev else "DESC") + " LIMIT :limit"
+                   ).format(cons, "AND m.msgid >= :before" if before != None else 
+                           ("AND m.msgid <= :after" if after != None else ""))
+                   ).params(userid = current_user.get_id(), limit = limit, before = before, after = after, **keys)
         res = db.engine.execute(stmt)
         msgs = []
         for row in res:

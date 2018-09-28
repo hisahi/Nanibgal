@@ -16,7 +16,7 @@
         <small class="text-muted">{%- if msg.is_reply %} <small class="text-primary"><span class="fa fa-reply has-tooltip" aria-hidden="true" title="{{ lang.tr('message.reply_tooltip') }}"></span></small> {%- endif %}
         <b><a href="{{ url_for('route_profile', username = username) }}">{{ displayname }}</a></b> &middot; ~{{ username }}{%- if is_private %} &middot; <b>{{ lang.tr("profile.private") }}</b>{%- endif %}{%- if is_banned %} &middot; <b>{{ lang.tr("profile.banned") }}</b>{%- endif %}</small>
         {%- endif %}
-        <small class="text-muted" title="{{ msg.get_date_iso() }}">{{ msg.get_date_iso() }}</small>
+        <small class="text-muted js-date-format" title="{{ msg.get_date_iso() }}" data-timestamp="{{ msg.get_date().timestamp() }}">{{ msg.get_date_iso() }}</small>
     </div>
     {%- if extra.disable_message_link %}
     <div class="mb-1 {{ 'whitespace-preserve' if extra.pre_wrap else 'whitespace-wrap' }}">{{ format_links(escape_html(msg.get_text())) | safe }}</div>

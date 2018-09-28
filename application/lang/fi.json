@@ -88,6 +88,7 @@
     "message.deleted": "Tämä viesti ei ole saatavilla, koska se on poistettu.",
     "message.is_reply": "Alla oleva viesti on vastaus yllä olevaan viestiin.",
     "message.reply_tooltip": "Tämä viesti on vastaus toiseen viestiin",
+    "message.somereplies": "Vastaukset tähän viestiin",
     "message.deletemodal.title": "Poista viesti",
     "message.deletemodal.text": "Haluatko varmasti poistaa tämän viestin?",
     "message.deletemodal.notyourmsg": "Huom.: Et lähettänyt tätä viestiä, mutta voit poistaa sen, sillä olet valvoja.",
@@ -117,6 +118,14 @@
     "editpost.error.toolate": "Viestiä voi vain muokata 10 minuutin sisällä sen lähettämisajasta.",
 
     "search.title": "Haku",
+    "search.titleuser": "Käyttäjähaku",
+    "search.searchmsgs": "Hae viestejä",
+    "search.searchusers": "Hae käyttäjiä",
+    "search.searchothermsgs": "Tee uusi viestihaku",
+    "search.searchotherusers": "Tee uusi käyttäjähaku",
+    "search.results": "Hakutulokset",
+    "search.noresults": "Tuloksia ei löytynyt",
+    "search.search": "Haku",
 
     "reportuser.title": "Ilmianna käyttäjä",
     "reportuser.success": "Kiitos ilmiannostasi.",

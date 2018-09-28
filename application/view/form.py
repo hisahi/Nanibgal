@@ -100,3 +100,15 @@ class ReportPostForm(FlaskForm):
         self.reason.label = lang.tr("reportmsg.reason")
         self.reason.choices = generate_msg_report_reason_list(lang)
         return self
+
+class SearchMessageForm(FlaskForm):
+    q = StringField("q")
+
+    def localized(self, lang):
+        return self
+
+class SearchUserForm(FlaskForm):
+    q = StringField("q")
+
+    def localized(self, lang):
+        return self
