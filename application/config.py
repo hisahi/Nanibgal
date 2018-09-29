@@ -5,7 +5,7 @@ DATABASE_URL = "postgresql://postgres:postgres@localhost/postgres"
 
 # Debug mode.
 # Do not enable unless you know what you are doing.
-DEBUG = True
+DEBUG = False
 
 # Public mode.
 # PUBLIC = True is not recommended on Flask dev server.

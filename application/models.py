@@ -553,7 +553,7 @@ class Message(db.Model):
             keys["stok" + str(stok)] = sql_like_escape(word).lower()
         if "by" in search[1]:
             cons += " AND lower(u.username) = lower(:byusername)"
-            keys["byusername"] = search[1]["by"]
+            keys["byusername"] = search[1]["by"].lower()
         stmt = text(("SELECT m.*, u.userid, u.username, "
                    + "u.displayname, COUNT(CASE WHEN likes.user = :userid THEN "
                    + "likes.user ELSE NULL END), COUNT(likes.user), "
