@@ -1,7 +1,5 @@
 # Nanibgal
-This README document is still a work in progress.
-
-A microblogging service created for a school project. The name comes from ones of the epithets of [Nidaba](https://en.wikipedia.org/wiki/Nidaba), the Sumerian goddess of writing and learning. The service supports:
+A microblogging service created as an university project. The name comes from ones of the epithets of [Nidaba](https://en.wikipedia.org/wiki/Nidaba), the Sumerian goddess of writing and learning. The service supports:
 
 - An authentication system for users
 - Posting posts up to 256 characters long
@@ -11,6 +9,7 @@ A microblogging service created for a school project. The name comes from ones o
 - Following specific people
 - Editing posts 5-10 minutes after they have been posted
 - Deleting posts
+- Searching for posts and users
 - Using an administrative system for deleting posts and banning users
 - A notification system
 
