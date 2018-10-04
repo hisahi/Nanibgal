@@ -11,7 +11,6 @@ def is_safe_url(host_url, target):
            ref_url.netloc == test_url.netloc
 
 def get_safe_url(host_url, target, fallback):
-    print("get_safe", host_url, target, fallback)
     if is_safe_url(host_url, target):
         return target
     else:
