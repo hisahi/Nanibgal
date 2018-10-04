@@ -45,7 +45,7 @@ def get_user_lang(headers, current_user):
     return lang
 
 @app.errorhandler(403)
-def page_not_found(e):
+def page_forbidden(e):
     lang = Language(get_user_lang(request.headers, current_user))
     return render_template("403.html", lang = lang), 403
 
