@@ -85,6 +85,7 @@
     "message.delete": "Poista",
     "message.likes": "Tykkäykset",
     "message.report": "Ilmianna",
+    "message.edited": "(tätä viestiä on muokattu)",
     "message.notavailable": "Tämä viesti ei ole saatavilla.",
     "message.private": "Tämä viesti ei ole saatavilla, koska sen käyttäjä on asettanut viestinsä yksityisiksi.",
     "message.deleted": "Tämä viesti ei ole saatavilla, koska se on poistettu.",

@@ -313,7 +313,10 @@ def route_msg_edit():
             return abort(403)
     except:
         return redirect(url_for("route_feed"))
-    nform = EditPostForm().localized(lang)
+    nform = EditPostForm(obj = populate_dict({
+        "contents": msg.get_text(),
+        "link": msg.get_link()
+    })).localized(lang)
     if oldform == None:
         oldform = nform
     return render_template("write/edit.html", lang = lang, form = nform, oldform = oldform, 

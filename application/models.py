@@ -465,6 +465,9 @@ class Message(db.Model):
     def get_text(self):
         return self.contents
 
+    def get_link(self):
+        return self.link or ""
+
     def get_date(self):
         return self.editdate or self.postdate
 
@@ -472,10 +475,7 @@ class Message(db.Model):
         return self.editdate != None
 
     def get_date_iso(self):
-        res = self.get_date().isoformat()
-        if self.has_been_edited():
-            res += "*"
-        return res
+        return self.get_date().isoformat()
 
     def get_author_id(self):
         return self.author

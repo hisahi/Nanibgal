@@ -5,7 +5,7 @@ function js_date_format() {
         var e = fmts[i];
         if (e.hasAttribute("data-timestamp")) {
             var old = +(e.getAttribute("data-timestamp"));
-            e.textContent = moment(old, "X").fromNow();
+            e.textContent = moment(old, "X").fromNow() + (e.getAttribute("data-edited") == "1" ? "*" : "");
         }
     }
 }

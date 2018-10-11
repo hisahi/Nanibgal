@@ -85,6 +85,7 @@
     "message.delete": "Delete",
     "message.likes": "Likes",
     "message.report": "Report",
+    "message.edited": "(this message has been edited)",
     "message.notavailable": "The message is not available.",
     "message.private": "The message is not available, as its user has set their messages to be private.",
     "message.deleted": "The message is not available, as it has been deleted.",
