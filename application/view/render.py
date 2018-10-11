@@ -10,7 +10,7 @@ def render_message(lang, message, user = None, userid = None, username = None,
                     has_liked = None, likes = None, replies = None, 
                     fallback_if_deleted = False, **kw):
     if message == None:
-        return render_template("message_deleted.html", lang = lang) if fallback_if_deleted else None
+        return render_template("message/message_deleted.html", lang = lang) if fallback_if_deleted else None
     if userid == None or username == None or displayname == None:
         if user == None:
             user = message.get_author()
@@ -32,7 +32,7 @@ def render_message(lang, message, user = None, userid = None, username = None,
         likes = message.get_total_likes()
     if replies == None:
         replies = message.get_total_replies()
-    return render_template("message.html",  lang = lang, 
+    return render_template("message/message.html",  lang = lang, 
                                             msg = message, 
                                             userid = userid,
                                             username = username,
@@ -45,22 +45,22 @@ def render_message(lang, message, user = None, userid = None, username = None,
                                             extra = kw)
 
 def render_user(lang, user):
-    return render_template("user.html", lang = lang, 
+    return render_template("profile/user.html", lang = lang, 
                                         user = user)
 
 def render_user_report(lang, report):
-    return render_template("viewreportuser.html", lang = lang, 
+    return render_template("admin/viewreportuser.html", lang = lang, 
                                         report = report)
 
 def render_message_report(lang, report):
-    return render_template("viewreportmsg.html", lang = lang, 
+    return render_template("admin/viewreportmsg.html", lang = lang, 
                                         report = report)
 
 def render_notification(lang, notification): # type(notification) = Notification
-    template = {0: "notification_follow.html",
-                1: "notification_like.html",
-                2: "notification_reply.html",
-                3: "notification_mention.html"}[notification.kind]
+    template = {0: "notification/notification_follow.html",
+                1: "notification/notification_like.html",
+                2: "notification/notification_reply.html",
+                3: "notification/notification_mention.html"}[notification.kind]
     return render_template(template, lang = lang, notification = notification)
 
 # add links to ~username and #tag

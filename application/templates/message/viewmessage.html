@@ -15,7 +15,7 @@
 {%- if msg.get_total_replies() > 0 %}
 <br />
 <h2>{{ lang.tr('message.somereplies') }}</h2>
-<a href="{{ url_for('route_profile_replies', username = username, postid = postid) }}">{{ lang.tr('viewmessage.showreplies') }}</a>
+<a href="{{ url_for('route_message_replies', username = username, postid = postid) }}">{{ lang.tr('viewmessage.showreplies') }}</a>
 <br />
 <br />
 <div class="list-group">

@@ -21,3 +21,10 @@
 .has-tooltip {
     cursor: help;
 }
+.load-more-button {
+    display: none;
+}
+.list-group .list-group-item-secondary a {
+    width: 100%;
+    display: block;
+}

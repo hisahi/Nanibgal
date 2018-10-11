@@ -5,17 +5,19 @@
         <title>{% block title %}{% endblock %}</title>
         <link rel="stylesheet" type="text/css" href="/static/global.css">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <link rel="stylesheet" type="text/css" href="/static/theme.min.css">
         <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
     </head>
 
     <body data-locale="{{ lang.code() }}">
-        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+        <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment-with-locales.min.js" integrity="sha256-VrmtNHAdGzjNsUNtWYG55xxE9xDTz4gF63x/prKXKH0=" crossorigin="anonymous"></script>
         <script src="/static/reloadsys.js"></script>
         <script src="/static/dateformat.js"></script>
-        <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
+        <script src="/static/loadmore.js"></script>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
             <a class="navbar-brand" href="#">{{ lang.tr("nanibgal") }}</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -33,11 +35,11 @@
                     </li>
                     {% endif %}
                     <li class="nav-item">
-                        {% set notif_count = current_user.get_notification_count() %}
-                        <a class="nav-link {{ 'font-weight-bold' if notif_count else '' }}" href="{{ url_for('route_notifications') }}">{{ lang.tr("top.notifications").replace("%d", "{}".format(notif_count)) }}</a>
+                        <a class="nav-link" href="{{ url_for('route_feed') }}">{{ lang.tr("top.feed") }}</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('route_feed') }}">{{ lang.tr("top.feed") }}</a>
+                        {% set notif_count = current_user.get_notification_count() %}
+                        <a class="nav-link {{ 'font-weight-bold' if notif_count else '' }}" href="{{ url_for('route_notifications') }}">{{ lang.tr("top.notifications").replace("%d", "{}".format(notif_count)) }}</a>
                     </li>
                     {% endif %}
                     <li class="nav-item">
@@ -54,13 +56,20 @@
                     {% endif %}
                 </ul>
                 {% if current_user.is_authenticated %}
-                <div class="form-inline mt-2 mt-md-0">
-                    <a href="{{ url_for('route_logout') }}">{{ lang.tr("top.logout") }}</a>
-                </div>
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link text-primary" href="{{ url_for('route_logout') }}">{{ lang.tr("top.logout") }}</a>
+                    </li>
+                </ul>
                 {% else %}
-                <div class="form-inline mt-2 mt-md-0">
-                    <a href="{{ url_for('route_login') + ('' if request.path in [url_for('route_login'), url_for('route_register')] else '?next=' + urllib.parse.quote_plus(request.path)) }}">{{ lang.tr("top.login") }}</a>
-                </div>
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link text-primary" href="{{ url_for('route_login') + ('' if request.path in [url_for('route_login'), url_for('route_register')] else '?next=' + urllib.parse.quote_plus(request.path)) }}">{{ lang.tr("top.login") }}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-primary" href="{{ url_for('route_register') + ('' if request.path in [url_for('route_login'), url_for('route_register')] else '?next=' + urllib.parse.quote_plus(request.path)) }}">{{ lang.tr("top.register") }}</a>
+                    </li>
+                </ul>
                 {% endif %}
             </div>
             </div>
@@ -69,6 +78,10 @@
             {% block body %}
             {% endblock %}
         </main>
+        <br />
+        <br />
+        <br />
+        <br />
         <br />
         <br />
     </body>

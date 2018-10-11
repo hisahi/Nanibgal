@@ -47,12 +47,12 @@ def get_user_lang(headers, current_user):
 @app.errorhandler(403)
 def page_forbidden(e):
     lang = Language(get_user_lang(request.headers, current_user))
-    return render_template("403.html", lang = lang), 403
+    return render_template("errors/403.html", lang = lang), 403
 
 @app.errorhandler(404)
 def page_not_found(e):
     lang = Language(get_user_lang(request.headers, current_user))
-    return render_template("404.html", lang = lang), 404
+    return render_template("errors/404.html", lang = lang), 404
 
 @app.route("/")
 def route_feed(): # 𒀭𒀭𒊺𒉀
@@ -60,7 +60,7 @@ def route_feed(): # 𒀭𒀭𒊺𒉀
     if not current_user.is_authenticated:
         return redirect(url_for("route_login"))
     if current_user.is_authenticated and current_user.is_banned():
-        return render_template("banned.html", lang = lang)
+        return render_template("errors/banned.html", lang = lang)
     msgs, next_page, prev_page = compute_pages(request.args, get_feed_from_user, current_user)
     return render_template("feed.html", lang = lang, msgs = msgs, 
                             render_message = bind1(render_message, lang), 
@@ -71,12 +71,12 @@ def route_feed(): # 𒀭𒀭𒊺𒉀
 def route_profile(username):
     lang = Language(get_user_lang(request.headers, current_user))
     if current_user.is_authenticated and current_user.is_banned():
-        return render_template("banned.html", lang = lang)
+        return render_template("errors/banned.html", lang = lang)
     user = get_user_by_name(username)
     if user == None:
         return abort(404)
     msgs, next_page, prev_page = compute_pages(request.args, get_user_messages, user, current_user)
-    return render_template("profile.html", lang = lang, user = user, msgs = msgs, 
+    return render_template("profile/profile.html", lang = lang, user = user, msgs = msgs, 
                             render_message = bind1(render_message, lang), 
                             prev_page = prev_page, next_page = next_page,
                             has_before = "b" in request.args or "a" in request.args)
@@ -86,14 +86,14 @@ def route_profile(username):
 def route_profile_likes(username):
     lang = Language(get_user_lang(request.headers, current_user))
     if current_user.is_authenticated and current_user.is_banned():
-        return render_template("banned.html", lang = lang)
+        return render_template("errors/banned.html", lang = lang)
     user = get_user_by_name(username)
     if user == None:
         return abort(404)
     if user.is_banned() and (not current_user.is_authenticated or not current_user.has_admin_rights()):
         return redirect(url_for("route_profile", username = username))
     msgs, next_page, prev_page = compute_pages(request.args, get_liked_messages, user, current_user)
-    return render_template("profile_likes.html", lang = lang, user = user, msgs = msgs, 
+    return render_template("profile/profile_likes.html", lang = lang, user = user, msgs = msgs, 
                             render_message = bind1(render_message, lang), 
                             prev_page = prev_page, next_page = next_page,
                             has_before = "b" in request.args or "a" in request.args)
@@ -103,14 +103,14 @@ def route_profile_likes(username):
 def route_profile_follows(username):
     lang = Language(get_user_lang(request.headers, current_user))
     if current_user.is_authenticated and current_user.is_banned():
-        return render_template("banned.html", lang = lang)
+        return render_template("errors/banned.html", lang = lang)
     user = get_user_by_name(username)
     if user == None:
         return abort(404)
     if user.is_banned() and (not current_user.is_authenticated or not current_user.has_admin_rights()):
         return redirect(url_for("route_profile", username = username))
     users, next_page, prev_page = compute_pages(request.args, get_followed_users, user)
-    return render_template("profile_follows.html", lang = lang, user = user, users = users, 
+    return render_template("profile/profile_follows.html", lang = lang, user = user, users = users, 
                             render_user = bind1(render_user, lang), 
                             prev_page = prev_page, next_page = next_page,
                             has_before = "b" in request.args or "a" in request.args)
@@ -120,14 +120,14 @@ def route_profile_follows(username):
 def route_profile_followers(username):
     lang = Language(get_user_lang(request.headers, current_user))
     if current_user.is_authenticated and current_user.is_banned():
-        return render_template("banned.html", lang = lang)
+        return render_template("errors/banned.html", lang = lang)
     user = get_user_by_name(username)
     if user == None:
         return abort(404)
     if user.is_banned() and (not current_user.is_authenticated or not current_user.has_admin_rights()):
         return redirect(url_for("route_profile", username = username))
     users, next_page, prev_page = compute_pages(request.args, get_followers, user)
-    return render_template("profile_followers.html", lang = lang, user = user, users = users, 
+    return render_template("profile/profile_followers.html", lang = lang, user = user, users = users, 
                             render_user = bind1(render_user, lang), 
                             prev_page = prev_page, next_page = next_page,
                             has_before = "b" in request.args or "a" in request.args)
@@ -136,7 +136,7 @@ def route_profile_followers(username):
 def route_message(username, postid):
     lang = Language(get_user_lang(request.headers, current_user))
     if current_user.is_authenticated and current_user.is_banned():
-        return render_template("banned.html", lang = lang)
+        return render_template("errors/banned.html", lang = lang)
     user = get_user_by_name(username)
     if user == None:
         return abort(404)
@@ -150,17 +150,17 @@ def route_message(username, postid):
     reply = None
     if msg.reply != None:
         reply = get_message_by_id(msg.reply)
-    return render_template("viewmessage.html", lang = lang, user = user, msg = msg, 
+    return render_template("message/viewmessage.html", lang = lang, user = user, msg = msg, 
                             reply = reply, reply_id = msg.reply, is_reply = msg.is_reply, 
                             render_message = bind1(render_message, lang),
                             username = username, postid = postid,
                             important_replies = msg.get_most_important_message_replies(current_user))
 
 @app.route("/~<username>/<int:postid>/replies")
-def route_profile_replies(username, postid):
+def route_message_replies(username, postid):
     lang = Language(get_user_lang(request.headers, current_user))
     if current_user.is_authenticated and current_user.is_banned():
-        return render_template("banned.html", lang = lang)
+        return render_template("errors/banned.html", lang = lang)
     user = get_user_by_name(username)
     if user == None:
         return abort(404)
@@ -170,7 +170,7 @@ def route_profile_replies(username, postid):
     if msg == None:
         return abort(404)
     msgs, next_page, prev_page = compute_pages(request.args, get_message_replies, msg, current_user)
-    return render_template("viewreplies.html", lang = lang, user = user, msgs = msgs, 
+    return render_template("message/viewreplies.html", lang = lang, user = user, msgs = msgs, 
                             render_message = bind1(render_message, lang), 
                             prev_page = prev_page, next_page = next_page,
                             has_before = "b" in request.args or "a" in request.args,
@@ -197,7 +197,7 @@ def route_login():
     nform = LoginForm().localized(lang)
     if oldform == None:
         oldform = nform
-    return render_template("login.html", lang = lang, form = nform, oldform = oldform, 
+    return render_template("auth/login.html", lang = lang, form = nform, oldform = oldform, 
                             error = error)
 
 @app.route("/register", methods = ["GET", "POST"])
@@ -220,44 +220,44 @@ def route_register():
     nform = RegisterForm().localized(lang)
     if oldform == None:
         oldform = nform
-    return render_template("register.html", lang = lang, form = nform, oldform = oldform, 
+    return render_template("auth/register.html", lang = lang, form = nform, oldform = oldform, 
                             error = error)
 
 @app.route("/search")
 def route_search():
     lang = Language(get_user_lang(request.headers, current_user))
     if current_user.is_authenticated and current_user.is_banned():
-        return render_template("banned.html", lang = lang)
+        return render_template("errors/banned.html", lang = lang)
     if request.args.get("q", None):
         q = request.args.get("q")[:512]
         msgs, next_page, prev_page = compute_pages(request.args, search_for_messages, current_user, q)
-        return render_template("search_results.html", lang = lang, msgs = msgs, 
+        return render_template("search/search_results.html", lang = lang, msgs = msgs, 
                                 render_message = bind1(render_message, lang), q = q, 
                                 prev_page = prev_page, next_page = next_page,
                                 has_before = "b" in request.args or "a" in request.args)
-    return render_template("search.html", lang = lang, form = SearchMessageForm(csrf_enabled = False).localized(lang))
+    return render_template("search/search.html", lang = lang, form = SearchMessageForm(csrf_enabled = False).localized(lang), formuser = SearchUserForm(csrf_enabled = False).localized(lang))
 
 @app.route("/searchuser")
 def route_search_user():
     lang = Language(get_user_lang(request.headers, current_user))
     if current_user.is_authenticated and current_user.is_banned():
-        return render_template("banned.html", lang = lang)
+        return render_template("errors/banned.html", lang = lang)
     if request.args.get("q", None):
         q = request.args.get("q")[:512]
         users, next_page, prev_page = compute_pages(request.args, search_for_users, current_user, q)
-        return render_template("searchuser_results.html", lang = lang, users = users, 
+        return render_template("search/searchuser_results.html", lang = lang, users = users, 
                                 render_user = bind1(render_user, lang), q = q,
                                 prev_page = prev_page, next_page = next_page,
                                 has_before = "b" in request.args or "a" in request.args)
-    return render_template("searchuser.html", lang = lang, form = SearchUserForm(csrf_enabled = False).localized(lang))
+    return render_template("search/search.html", lang = lang, form = SearchMessageForm(csrf_enabled = False).localized(lang), formuser = SearchUserForm(csrf_enabled = False).localized(lang))
 
 @app.route("/notifications")
 @login_required
 def route_notifications():
     lang = Language(get_user_lang(request.headers, current_user))
     if current_user.is_authenticated and current_user.is_banned():
-        return render_template("banned.html", lang = lang)
-    return render_template("notifications.html", lang = lang, 
+        return render_template("errors/banned.html", lang = lang)
+    return render_template("notification/notifications.html", lang = lang, 
                             notifs = current_user.get_notifications(False), 
                             render_notification = bind1(render_notification, lang))
 
@@ -266,7 +266,7 @@ def route_notifications():
 def route_new():
     lang = Language(get_user_lang(request.headers, current_user))
     if current_user.is_banned():
-        return render_template("banned.html", lang = lang)
+        return render_template("errors/banned.html", lang = lang)
     error, oldform = None, None
     if request.method == "POST":
         lform = NewPostForm(request.form)
@@ -286,7 +286,7 @@ def route_new():
     nform = NewPostForm().localized(lang)
     if oldform == None:
         oldform = nform
-    return render_template("new.html", lang = lang, form = nform, oldform = oldform, 
+    return render_template("write/new.html", lang = lang, form = nform, oldform = oldform, 
                             reply = render_message(lang, msg), reply_id = reply_id, error = error)
 
 @app.route("/edit", methods = ["GET", "POST"])
@@ -294,7 +294,7 @@ def route_new():
 def route_msg_edit():
     lang = Language(get_user_lang(request.headers, current_user))
     if current_user.is_authenticated and current_user.is_banned():
-        return render_template("banned.html", lang = lang)
+        return render_template("errors/banned.html", lang = lang)
     error, oldform = None, None
     if request.method == "POST":
         lform = EditPostForm(request.form)
@@ -316,7 +316,7 @@ def route_msg_edit():
     nform = EditPostForm().localized(lang)
     if oldform == None:
         oldform = nform
-    return render_template("edit.html", lang = lang, form = nform, oldform = oldform, 
+    return render_template("write/edit.html", lang = lang, form = nform, oldform = oldform, 
                                 msg = msg, error = error, render_message = bind1(render_message, lang))
 
 @app.route("/settings", methods = ["GET", "POST"])
@@ -324,7 +324,7 @@ def route_msg_edit():
 def route_settings():
     lang = Language(get_user_lang(request.headers, current_user))
     if current_user.is_banned():
-        return render_template("banned.html", lang = lang)
+        return render_template("errors/banned.html", lang = lang)
     error, oldform, success = None, None, False
     if request.method == "POST":
         lform = SettingsForm(request.form).localized(lang)
@@ -347,7 +347,7 @@ def route_settings():
     })).localized(lang)
     if oldform == None:
         oldform = nform
-    return render_template("settings.html", lang = lang, form = nform, 
+    return render_template("auth/settings.html", lang = lang, form = nform, 
                             deleteform = DeleteAccountForm().localized(lang), 
                             oldform = oldform, error = error, success = success)
 
@@ -439,16 +439,16 @@ def route_notifications_read():
 def route_report_user():
     lang = Language(get_user_lang(request.headers, current_user))
     if current_user.is_banned():
-        return render_template("banned.html", lang = lang)
+        return render_template("errors/banned.html", lang = lang)
     lform = ReportUserForm(request.form).localized(lang)
     nform = ReportUserForm().localized(lang)
     if request.method == "POST":
         if lform.validate():
             error = handle_user_report(current_user.get_id(), request.form)
             if error:
-                return render_template("reportuser.html", lang = lang, form = nform, error = error)
+                return render_template("profile/reportuser.html", lang = lang, form = nform, error = error)
             else:
-                return render_template("reportuser.html", lang = lang, success = True, error = None)
+                return render_template("profile/reportuser.html", lang = lang, success = True, error = None)
         else:
             error = lang.tr("reportuser.error.invalidform")
     user_id = request.args.get("uid", default = None)
@@ -456,23 +456,23 @@ def route_report_user():
         user_id = int(user_id)
     except:
         return abort(400)
-    return render_template("reportuser.html", lang = lang, form = nform, user_id = user_id, error = None)
+    return render_template("profile/reportuser.html", lang = lang, form = nform, user_id = user_id, error = None)
 
 @app.route("/reportmsg", methods = ["GET", "POST"])
 @login_required
 def route_report_msg():
     lang = Language(get_user_lang(request.headers, current_user))
     if current_user.is_banned():
-        return render_template("banned.html", lang = lang)
+        return render_template("errors/banned.html", lang = lang)
     lform = ReportPostForm(request.form).localized(lang)
     nform = ReportPostForm().localized(lang)
     if request.method == "POST":
         if lform.validate():
             error = handle_message_report(current_user.get_id(), request.form)
             if error:
-                return render_template("reportmsg.html", lang = lang, form = nform, error = lang.tr(error))
+                return render_template("message/reportmsg.html", lang = lang, form = nform, error = lang.tr(error))
             else:
-                return render_template("reportmsg.html", lang = lang, success = True, error = None)
+                return render_template("message/reportmsg.html", lang = lang, success = True, error = None)
         else:
             error = lang.tr("reportmsg.error.invalidform")
     msg_id = request.args.get("mid", default = None)
@@ -480,24 +480,24 @@ def route_report_msg():
         msg_id = int(msg_id)
     except:
         return abort(400)
-    return render_template("reportmsg.html", lang = lang, form = nform, msg_id = msg_id, error = None)
+    return render_template("message/reportmsg.html", lang = lang, form = nform, msg_id = msg_id, error = None)
 
 @app.route("/admin")
 @login_required
 def route_admin():
     lang = Language(get_user_lang(request.headers, current_user))
     if not current_user.has_admin_rights() or current_user.is_banned():
-        return render_template("notadmin.html", lang = lang)
-    return render_template("admin.html", lang = lang)
+        return render_template("errors/notadmin.html", lang = lang)
+    return render_template("admin/admin.html", lang = lang)
 
 @app.route("/admin/reports/user")
 @login_required
 def route_admin_userreports():
     lang = Language(get_user_lang(request.headers, current_user))
     if not current_user.has_admin_rights() or current_user.is_banned():
-        return render_template("notadmin.html", lang = lang)
+        return render_template("errors/notadmin.html", lang = lang)
     reports, next_page, prev_page = compute_pages(request.args, get_user_reports, current_user)
-    return render_template("admin_userreports.html", lang = lang, reports = reports, 
+    return render_template("admin/admin_userreports.html", lang = lang, reports = reports, 
                             render_report = bind1(render_user_report, lang), 
                             prev_page = prev_page, next_page = next_page,
                             has_before = "b" in request.args or "a" in request.args)
@@ -507,9 +507,9 @@ def route_admin_userreports():
 def route_admin_msgreports():
     lang = Language(get_user_lang(request.headers, current_user))
     if not current_user.has_admin_rights() or current_user.is_banned():
-        return render_template("notadmin.html", lang = lang)
+        return render_template("errors/notadmin.html", lang = lang)
     reports, next_page, prev_page = compute_pages(request.args, get_message_reports, current_user)
-    return render_template("admin_msgreports.html", lang = lang, reports = reports, 
+    return render_template("admin/admin_msgreports.html", lang = lang, reports = reports, 
                             render_report = bind1(render_message_report, lang), 
                             prev_page = prev_page, next_page = next_page,
                             has_before = "b" in request.args or "a" in request.args)

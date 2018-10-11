@@ -73,3 +73,8 @@ myös. Tätä toimintoa ei voi perua, joten harkitse asiaa ennen tilin poistoa.
 
 ## Paikallistaminen
 Nanibgal tukee täyttä käyttöliittymän paikallistamista.
+
+## Valvojat
+Käyttäjien valvojatilan asettaminen tai poistaminen vaatii pääsyä
+tietokantaan. Käyttäjien valvojuuden voi lisätä tai poistaa muuttamalla
+käyttäjän is_admin-arvoa.

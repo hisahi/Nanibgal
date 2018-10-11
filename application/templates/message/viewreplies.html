@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}{{ lang.tr('viewmessage.replytitle').replace("%u", user.get_user_name()) }} - Nanibgal{% endblock %}
+
+{% block body %}
+<div class="list-group {{ (not msgs) and 'list-group-flush' or '' }}">
+{%- if prev_page %}
+<li class="list-group-item list-group-item-secondary"><a href="{{ url_for('route_message_replies', username = username, postid = postid) + '?b={}'.format(prev_page) }}"><span class="fa fa-chevron-left" aria-hidden="true"></span> {{ lang.tr('feed.prevpage') }}</a></li>
+{%- elif has_before %}
+<li class="list-group-item list-group-item-secondary"><a href="{{ url_for('route_message_replies', username = username, postid = postid) }}"><span class="fa fa-refresh" aria-hidden="true"></span> {{ lang.tr('feed.viewnewest') }}</a></li>
+{%- endif %}
+{%- for msg in msgs %}
+{{ render_message(msg['msg'], userid = msg['user']['userid'], username = msg['user']['username'], displayname = msg['user']['displayname'], has_liked = msg['has_liked'], likes = msg['likes'], replies = msg['replies']) | safe }}
+{%- endfor %}
+{%- if not msgs %}
+<li class="list-group-item">{{ lang.tr('viewmessage.noreplies') }}</li>
+{%- endif %}
+{%- if next_page %}
+<li class="list-group-item list-group-item-secondary"><a id="next-page-button" href="{{ url_for('route_message_replies', username = username, postid = postid) + '?a={}'.format(next_page) }}">{{ lang.tr('feed.nextpage') }} <span class="fa fa-chevron-right" aria-hidden="true"></span></a></li>
+<li class="list-group-item list-group-item-secondary load-more-button"><a id="load-more-button" href="javascript:void(0)" data-source="{{ url_for('route_message_replies', username = username, postid = postid) + '?a={}'.format(next_page) }}"><span class="fa fa-chevron-down" aria-hidden="true"></span> {{ lang.tr('feed.loadmore') }}</a></li>
+{%- endif %}
+</div>
+{% endblock %}

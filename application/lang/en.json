@@ -8,6 +8,7 @@
     "top.settings": "Settings",
     "top.admin": "Admin",
     "top.login": "Log in",
+    "top.register": "Register",
     "top.logout": "Log out",
 
     "login.title": "Log in",
@@ -64,6 +65,7 @@
     "feed.nomessages": "No messages on your feed. Your messages and the messages of people you follow will show up here.",
     "feed.nextpage": "next page",
     "feed.prevpage": "previous page",
+    "feed.loadmore": "load more",
     "feed.viewnewest": "view newest",
 
     "user.notavailable": "This user is not available.",

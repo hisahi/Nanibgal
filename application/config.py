@@ -1,5 +1,5 @@
 
-# Database configuration
+# Database configuration (Nanibgal is designed for PostgreSQL)
 # Ignored if run in an Heroku instance
 DATABASE_URL = "postgresql://postgres:postgres@localhost/postgres"
 

@@ -45,9 +45,12 @@
 &middot;
 <a href="{{ url_for('route_profile_followers', username = user.get_user_name()) }}">{{ lang.tr('profile.followers') }}</a>
 {%- endif %}
+<br />
+<br />
 <div>
 <p class="font-italic pre-wrap">{{ user.get_user_bio() }}</p>
 </div>
+<br />
 <div class="list-group {{ (not msgs) and 'list-group-flush' or '' }}">
 {%- if prev_page %}
 <li class="list-group-item list-group-item-secondary"><a href="{{ url_for('route_profile', username = user.get_user_name()) + '?b={}'.format(prev_page) }}"><span class="fa fa-chevron-left" aria-hidden="true"></span> {{ lang.tr('feed.prevpage') }}</a></li>
@@ -65,7 +68,8 @@
 {%- endif %}
 {% endif %}
 {%- if next_page %}
-<li class="list-group-item list-group-item-secondary"><a href="{{ url_for('route_profile', username = user.get_user_name()) + '?a={}'.format(next_page) }}">{{ lang.tr('feed.nextpage') }} <span class="fa fa-chevron-right" aria-hidden="true"></span></a></li>
+<li class="list-group-item list-group-item-secondary"><a id="next-page-button" href="{{ url_for('route_profile', username = user.get_user_name()) + '?a={}'.format(next_page) }}">{{ lang.tr('feed.nextpage') }} <span class="fa fa-chevron-right" aria-hidden="true"></span></a></li>
+<li class="list-group-item list-group-item-secondary load-more-button"><a id="load-more-button" href="javascript:void(0)" data-source="{{ url_for('route_profile', username = user.get_user_name()) + '?a={}'.format(next_page) }}"><span class="fa fa-chevron-down" aria-hidden="true"></span> {{ lang.tr('feed.loadmore') }}</a></li>
 {%- endif %}
 </div>
 {%- endif %}

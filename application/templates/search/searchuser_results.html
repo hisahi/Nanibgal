@@ -20,7 +20,8 @@
 <li class="list-group-item">{{ lang.tr('search.noresults') }}</li>
 {%- endif %}
 {%- if next_page %}
-<li class="list-group-item list-group-item-secondary"><a href="{{ url_for('route_search_user') + prefix_nonempty('?', request.query_string.decode('utf-8', 'ignore')) + '&a={}'.format(next_page) }}">{{ lang.tr('feed.nextpage') }} <span class="fa fa-chevron-right" aria-hidden="true"></span></a></li>
+<li class="list-group-item list-group-item-secondary"><a id="next-page-button" href="{{ url_for('route_search_user') + prefix_nonempty('?', request.query_string.decode('utf-8', 'ignore')) + '&a={}'.format(next_page) }}">{{ lang.tr('feed.nextpage') }} <span class="fa fa-chevron-right" aria-hidden="true"></span></a></li>
+<li class="list-group-item list-group-item-secondary load-more-button"><a id="load-more-button" href="javascript:void(0)" data-source="{{ url_for('route_search_user') + prefix_nonempty('?', request.query_string.decode('utf-8', 'ignore')) + '&a={}'.format(next_page) }}"><span class="fa fa-chevron-down" aria-hidden="true"></span> {{ lang.tr('feed.loadmore') }}</a></li>
 {%- endif %}
 </div>
 {% endblock %}

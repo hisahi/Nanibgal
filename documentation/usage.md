@@ -73,3 +73,8 @@ The operation cannot be undone, so think twice about deleting your account.
 
 ## Localization
 Nanibgal supports full localization of the user interface.
+
+## Administrators
+To grant an user administrator rights or remove them from the user, database
+access is required. The administrator rights are given or taken by modifying
+the is_admin flag of the user.

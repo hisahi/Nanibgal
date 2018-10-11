@@ -8,6 +8,7 @@
     "top.settings": "Asetukset",
     "top.admin": "Valvoja",
     "top.login": "Kirjaudu",
+    "top.register": "Luo tili",
     "top.logout": "Kirjaudu ulos",
 
     "login.title": "Kirjaudu",
@@ -64,6 +65,7 @@
     "feed.nomessages": "Syötteessäsi ei ole vielä mitään. Sekä sinun viestisi että seuraamiesi käyttäjien viestit näkyvät tässä.",
     "feed.nextpage": "seuraava sivu",
     "feed.prevpage": "edellinen sivu",
+    "feed.loadmore": "lataa lisää",
     "feed.viewnewest": "näytä uusimmat",
 
     "user.notavailable": "Tämä käyttäjä ei ole saatavilla.",
