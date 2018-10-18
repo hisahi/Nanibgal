@@ -14,7 +14,7 @@ def handle_settings(id, request):
         return "settings.error.invalid_old_password"
     if request["password"] or request["verify"]:
         if request["password"] == request["verify"]:
-            user.change_password(user["password"])
+            user.change_password(request["password"])
     if request["displayname"]:
         # remove leading and trailing whitespace
         fmt = request["displayname"].strip()[:64]
