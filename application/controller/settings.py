@@ -49,7 +49,7 @@ def handle_delete_account(id, request):
         if not user.password_ok(request["oldpassword"][:256]):
             return "settings.account_not_deleted"
         if request["deleteaccount"] == user.get_user_name():
-            user.terminate()
+            user.delete_self()
             logout_user()
         else:
             return "settings.account_not_deleted"

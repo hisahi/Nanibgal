@@ -306,6 +306,13 @@ class User(db.Model):
         self.banned = not self.banned
         self.update()
 
+    def delete_self(self):
+        stmt = text("DELETE FROM " + table_Follows.name + " "
+                + "WHERE \"follower\" = :myid OR \"followed\" = :myid"
+                ).params(myid = self.userid)
+        db.engine.execute(stmt)
+        self.terminate()
+
     def has_liked_message(self, message):
         return (db.session.query(table_Likes.c.user)
                             .filter(table_Likes.c.user == self.userid)
